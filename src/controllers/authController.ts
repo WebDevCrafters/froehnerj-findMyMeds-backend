@@ -3,10 +3,10 @@ import { Request, Response } from "express";
 
 class AuthController implements AuthEndpoints {
     signIn(req: Request, res: Response) {
-        //implement
+        res.send("Hii i am sigin")
     }
     signUp(req: Request, res: Response) {
-        //implement
+        res.send("Hii i am sigup")
     }
 }
 
