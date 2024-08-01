@@ -1,4 +1,4 @@
-import { PatientEndpoints } from "../interfaces/patientEndpoints";
+import { PatientEndpoints } from "../interfaces/endpoints/patientEndpoints";
 import { Request, Response } from "express";
 
 class PatientController implements PatientEndpoints {

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ClinicianEndpoints } from "../interfaces/clinicianEndpoints";
+import { ClinicianEndpoints } from "../interfaces/endpoints/clinicianEndpoints";
 
 class ClinicianController implements ClinicianEndpoints {
     getPatientsList(req: Request, res: Response): void {
