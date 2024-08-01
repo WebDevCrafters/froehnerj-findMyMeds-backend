@@ -7,6 +7,7 @@ dotenv.config();
 const app = express();
 connectToDB();
 
+app.use(express.json())
 app.use("/api/auth", authRouter)
 
 export default app;

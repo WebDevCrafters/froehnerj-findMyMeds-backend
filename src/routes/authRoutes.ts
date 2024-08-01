@@ -3,8 +3,8 @@ import express, { Request, Response } from 'express';
 
 const authRouter = express.Router();
 
-authRouter.route('/signin').get(authController.signIn)
-authRouter.route('/signup').get(authController.signUp)
+authRouter.route('/signin').post(authController.signIn)
+authRouter.route('/signup').post(authController.signUp)
 
 export default authRouter;
 
