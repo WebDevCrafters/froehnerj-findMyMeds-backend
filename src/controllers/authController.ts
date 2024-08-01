@@ -1,4 +1,4 @@
-import { AuthEndpoints } from "../interfaces/authEndpoints";
+import { AuthEndpoints } from "../interfaces/endpoints/authEndpoints";
 import { Request, Response } from "express";
 
 class AuthController implements AuthEndpoints {
