@@ -1,11 +1,6 @@
-import { Response } from "express"
 import { User } from "../schemaTypes/User";
 
-export interface AuthResponse extends Response{
-    body: AuthResponseBody
-}
-
-export interface AuthResponseBody{
+export interface AuthResponseJSON {
     accessToken: string;
-    user: User
+    user: User;
 }

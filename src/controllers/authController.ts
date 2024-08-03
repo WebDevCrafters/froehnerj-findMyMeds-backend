@@ -2,7 +2,7 @@ import { AuthEndpoints } from "../interfaces/endpoints/authEndpoints";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { AuthRequest } from "../interfaces/requests/AuthRequest";
-import { AuthResponse } from "../interfaces/responses/AuthResponse";
+import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
 import UserModel from "../models/UserModel";
 import { User } from "../interfaces/schemaTypes/User";
 import { NotFoundError } from "../classes/errors/notFoundError";
@@ -16,7 +16,7 @@ class AuthController implements AuthEndpoints {
             throw new NotFoundError();
         }
 
-        const responseBody = {
+        const responseBody: AuthResponseJSON = {
             accessToken: "fsgs",
             user: userFromDB,
         };
