@@ -1,9 +1,10 @@
 import { authController } from "../controllers/authController";
 import express, { Request, Response } from 'express';
+import asyncHandler from "../middleware/asyncHandler";
 
 const authRouter = express.Router();
 
-authRouter.route('/signin').post(authController.signIn)
+authRouter.route('/signin').post(asyncHandler(authController.signIn))
 authRouter.route('/signup').post(authController.signUp)
 
 export default authRouter;
