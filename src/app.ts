@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import dotenv from 'dotenv';
 import connectToDB from "./config/dbConnection";
-import userRouter from "./routes/authRoutes";
+import userRouter from "./routes/userRoutes";
 import errorHandler from "./middleware/errorHandler";
 
 dotenv.config();

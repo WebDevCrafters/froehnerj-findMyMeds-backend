@@ -1,4 +1,4 @@
-import { UserEndpoints } from "../interfaces/endpoints/authEndpoints";
+import { UserEndpoints } from "../interfaces/endpoints/userEndpoints";
 import { Request, Response } from "express";
 import { AuthRequest } from "../interfaces/requests/AuthRequest";
 import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
@@ -11,6 +11,7 @@ import User from "../interfaces/schemaTypes/User";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
 import UserResponse from "../interfaces/responses/UserResponse";
 import { comparePassword, hashPassword } from "../utils/bcryptManager";
+import { UnauthorizedError } from "../classes/errors/unauthorizedError";
 
 class UserController implements UserEndpoints {
     public async signIn(req: AuthRequest, res: Response) {
@@ -38,7 +39,7 @@ class UserController implements UserEndpoints {
         );
 
         if (!isPasswordMatch) {
-            throw new ForbiddenError("Invalid email or password.");
+            throw new UnauthorizedError("Incorrect password.");
         }
 
         const accessToken = getJWTToken(email);

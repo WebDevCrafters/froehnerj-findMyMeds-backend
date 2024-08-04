@@ -1,4 +1,4 @@
-import { userController } from "../controllers/authController";
+import { userController } from "../controllers/userController";
 import express, { Request, Response } from "express";
 import asyncHandler from "../middleware/asyncHandler";
 import { validateUserType } from "../middleware/validateUserType";
