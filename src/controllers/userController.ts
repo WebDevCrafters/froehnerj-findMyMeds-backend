@@ -104,21 +104,43 @@ class UserController implements UserEndpoints {
     }
 
     public async updateUser(req: Request, res: Response) {
-        const updateUser = req.body;
+        const updateUserRequest = req.body;
 
-        if (!updateUser) throw new BadRequestError();
+        if (!updateUserRequest) throw new BadRequestError();
 
-        const { _id: userId } = updateUser;
+        const { _id: userId, password } = updateUserRequest;
 
         if (!mongoose.isValidObjectId(userId)) {
             throw new BadRequestError("Invalid user Id");
         }
 
-        const updatedUser = await UserModel.findByIdAndUpdate(updateUser);
+        let hashedPassword;
+        if (password) {
+            hashedPassword = await hashPassword(password);
+        }
+
+        updateUserRequest.password = hashedPassword;
+
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            updateUserRequest,
+            { new: true, runValidators: true }
+        );
 
         if (!updatedUser) throw new NotFoundError();
 
-        res.json(updatedUser);
+        const userResult: SecureUser = {
+            _id: updatedUser._id,
+            dob: updatedUser.dob,
+            doctorId: updatedUser.doctorId,
+            email: updatedUser.email,
+            locationId: updatedUser.locationId,
+            name: updatedUser.name,
+            phoneNumber: updatedUser.phoneNumber,
+            userType: updatedUser.userType,
+        };
+
+        res.json(userResult);
     }
 
     public async getUser(req: Request, res: Response) {

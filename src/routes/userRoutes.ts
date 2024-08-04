@@ -13,5 +13,8 @@ userRouter
 userRouter
     .route("/:id")
     .get(validateTokenHandler, asyncHandler(userController.getUser));
+userRouter
+    .route("/update")
+    .put(validateTokenHandler, asyncHandler(userController.updateUser));
 
 export default userRouter;
