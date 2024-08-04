@@ -9,5 +9,6 @@ userRouter.route("/signin").post(asyncHandler(userController.signIn));
 userRouter
     .route("/signup")
     .post(validateUserType, asyncHandler(userController.signUp));
+userRouter.route("/:id").get(asyncHandler(userController.getUser));
 
 export default userRouter;

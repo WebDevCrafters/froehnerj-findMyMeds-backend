@@ -123,19 +123,15 @@ class UserController implements UserEndpoints {
     }
 
     public async getUser(req: AuthRequest, res: Response) {
-        const userReq = req.body?.user;
+        const idetifier = req.params.id;
 
-        if (!userReq) throw new BadRequestError();
-
-        const { _id: userId, email } = userReq;
-
-        if (!userId && !email) throw new BadRequestError();
+        if (!idetifier) throw new BadRequestError();
 
         let userFromDB = null;
-        if (mongoose.isValidObjectId(userId)) {
-            userFromDB = await UserModel.findById(userId);
+        if (mongoose.isValidObjectId(idetifier)) {
+            userFromDB = await UserModel.findById(idetifier);
         } else {
-            userFromDB = await UserModel.findOne({ email });
+            userFromDB = await UserModel.findOne({ email: idetifier });
         }
 
         if (!userFromDB) throw new NotFoundError();
