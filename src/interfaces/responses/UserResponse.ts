@@ -1,16 +1,15 @@
 import { Types } from "mongoose";
-import { UserType } from "./enums/UserType";
+import { UserType } from "../schemaTypes/enums/UserType";
 
-interface User extends Document {
-    _id: string,
+interface UserResponse {
+    _id: string;
     email: string;
     phoneNumber: string;
     name: string;
     userType: UserType;
     dob: number;
-    password?: string;
     doctorId: Types.ObjectId;
     locationId: Types.ObjectId;
 }
 
-export default User;
+export default UserResponse;

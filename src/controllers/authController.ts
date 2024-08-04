@@ -1,14 +1,15 @@
 import { AuthEndpoints } from "../interfaces/endpoints/authEndpoints";
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import { AuthRequest } from "../interfaces/requests/AuthRequest";
 import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
 import UserModel from "../models/UserModel";
-import { User } from "../interfaces/schemaTypes/User";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { ConflictError } from "../classes/errors/conflictError";
 import { BadRequestError } from "../classes/errors/badRequestError";
 import { getJWTToken } from "../config/jwtManager";
+import User from "../interfaces/schemaTypes/User";
+import { ForbiddenError } from "../classes/errors/forbiddenError";
+import UserResponse from "../interfaces/responses/UserResponse";
 
 class AuthController implements AuthEndpoints {
     public async signIn(req: AuthRequest, res: Response) {
@@ -17,24 +18,39 @@ class AuthController implements AuthEndpoints {
             throw new BadRequestError("Invalid request body.");
         }
 
-        const { email } = user;
-        if (!email) {
+        const { email, password } = user;
+        if (!email || !password) {
             throw new BadRequestError("Invalid request body.");
         }
 
         const userFromDB: User | null = await UserModel.findOne({
             email,
-        }).select("-password");
+        });
 
         if (!userFromDB) {
             throw new NotFoundError();
         }
 
+        if (password !== userFromDB.password) {
+            throw new ForbiddenError("Invalid email or password.");
+        }
+
         const accessToken = getJWTToken(email);
+
+        const userResponse: UserResponse = {
+            _id: userFromDB._id,
+            email: userFromDB.email,
+            phoneNumber: userFromDB.phoneNumber,
+            name: userFromDB.name,
+            userType: userFromDB.userType,
+            dob: userFromDB.dob,
+            doctorId: userFromDB.doctorId,
+            locationId: userFromDB.locationId,
+        };
 
         const responseBody: AuthResponseJSON = {
             accessToken: accessToken,
-            user: userFromDB,
+            user: userResponse,
         };
 
         res.json(responseBody);
