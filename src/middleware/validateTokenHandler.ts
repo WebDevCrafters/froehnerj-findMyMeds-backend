@@ -1,13 +1,12 @@
 import jwt from "jsonwebtoken";
 import { getSecretkey } from "../utils/jwtManager";
 import { BadRequestError } from "../classes/errors/badRequestError";
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
 import User from "../interfaces/schemaTypes/User";
-import { AuthRequest } from "../interfaces/requests/AuthRequest";
 
 export const validateTokenHandler = (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
@@ -25,7 +24,7 @@ export const validateTokenHandler = (
             throw new BadRequestError("Invalid access token.");
         }
 
-        req.body.user = (decoded as { user: User }).user;
+        req.user = (decoded as { user: User }).user;
         next();
     });
 };

@@ -1,7 +1,5 @@
 import { UserEndpoints } from "../interfaces/endpoints/userEndpoints";
 import { Request, Response } from "express";
-import { AuthRequest } from "../interfaces/requests/AuthRequest";
-import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
 import UserModel from "../models/UserModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { ConflictError } from "../classes/errors/conflictError";
@@ -9,14 +7,15 @@ import { BadRequestError } from "../classes/errors/badRequestError";
 import { getJWTToken } from "../utils/jwtManager";
 import User from "../interfaces/schemaTypes/User";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
-import UserResponse from "../interfaces/responses/UserResponse";
+import SecureUser from "../interfaces/responses/SecureUser";
 import { comparePassword, hashPassword } from "../utils/bcryptManager";
 import { UnauthorizedError } from "../classes/errors/unauthorizedError";
 import mongoose from "mongoose";
+import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
 
 class UserController implements UserEndpoints {
-    public async signIn(req: AuthRequest, res: Response) {
-        const user = req.body?.user;
+    public async signIn(req: Request, res: Response) {
+        const user = req.body;
         if (!user) {
             throw new BadRequestError("Invalid request body.");
         }
@@ -45,7 +44,7 @@ class UserController implements UserEndpoints {
 
         const accessToken = getJWTToken(email);
 
-        const userResponse: UserResponse = {
+        const userResponse: SecureUser = {
             _id: userFromDB._id,
             email: userFromDB.email,
             phoneNumber: userFromDB.phoneNumber,
@@ -64,8 +63,8 @@ class UserController implements UserEndpoints {
         res.json(responseBody);
     }
 
-    public async signUp(req: AuthRequest, res: Response) {
-        const user = req.body?.user;
+    public async signUp(req: Request, res: Response) {
+        const user = req.body;
         if (!user) {
             throw new BadRequestError("Invalid request body.");
         }
@@ -86,7 +85,7 @@ class UserController implements UserEndpoints {
         const newUser = await UserModel.create(user);
         const accessToken = getJWTToken(email);
 
-        const userResponse: UserResponse = {
+        const userResponse: SecureUser = {
             _id: newUser._id,
             email: newUser.email,
             phoneNumber: newUser.phoneNumber,
@@ -104,8 +103,8 @@ class UserController implements UserEndpoints {
         res.json(authResponse);
     }
 
-    public async updateUser(req: AuthRequest, res: Response) {
-        const updateUser = req.body?.user;
+    public async updateUser(req: Request, res: Response) {
+        const updateUser = req.body;
 
         if (!updateUser) throw new BadRequestError();
 
@@ -122,7 +121,7 @@ class UserController implements UserEndpoints {
         res.json(updatedUser);
     }
 
-    public async getUser(req: AuthRequest, res: Response) {
+    public async getUser(req: Request, res: Response) {
         const idetifier = req.params.id;
 
         if (!idetifier) throw new BadRequestError();
@@ -136,7 +135,7 @@ class UserController implements UserEndpoints {
 
         if (!userFromDB) throw new NotFoundError();
 
-        const userResponse: UserResponse = {
+        const userResponse: SecureUser = {
             _id: userFromDB._id,
             email: userFromDB.email,
             phoneNumber: userFromDB.phoneNumber,

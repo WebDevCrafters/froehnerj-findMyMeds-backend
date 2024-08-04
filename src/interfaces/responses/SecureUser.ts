@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { UserType } from "../schemaTypes/enums/UserType";
 
-interface UserResponse {
+interface SecureUser {
     _id: string;
     email: string;
     phoneNumber: string;
@@ -12,4 +12,4 @@ interface UserResponse {
     locationId: Types.ObjectId;
 }
 
-export default UserResponse;
+export default SecureUser;

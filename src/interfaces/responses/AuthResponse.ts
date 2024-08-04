@@ -1,7 +1,7 @@
 import User  from "../schemaTypes/User";
-import UserResponse from "./UserResponse";
+import SecureUser from "./SecureUser";
 
 export interface AuthResponseJSON {
     accessToken: string;
-    user: UserResponse;
+    user: SecureUser;
 }

@@ -7,7 +7,7 @@ export const validateUserType = (
     res: Response,
     next: NextFunction
 ) => {
-    const user = req.body?.user;
+    const user = req.body;
     if (!user) {
         throw new BadRequestError("Invalid request body.");
     }
