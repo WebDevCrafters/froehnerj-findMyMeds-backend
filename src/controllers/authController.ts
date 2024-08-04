@@ -6,10 +6,11 @@ import UserModel from "../models/UserModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { ConflictError } from "../classes/errors/conflictError";
 import { BadRequestError } from "../classes/errors/badRequestError";
-import { getJWTToken } from "../config/jwtManager";
+import { getJWTToken } from "../utils/jwtManager";
 import User from "../interfaces/schemaTypes/User";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
 import UserResponse from "../interfaces/responses/UserResponse";
+import { comparePassword, hashPassword } from "../utils/bcryptManager";
 
 class AuthController implements AuthEndpoints {
     public async signIn(req: AuthRequest, res: Response) {
@@ -31,7 +32,12 @@ class AuthController implements AuthEndpoints {
             throw new NotFoundError();
         }
 
-        if (password !== userFromDB.password) {
+        const isPasswordMatch = await comparePassword(
+            password,
+            userFromDB.password
+        );
+        
+        if (!isPasswordMatch) {
             throw new ForbiddenError("Invalid email or password.");
         }
 
@@ -72,12 +78,26 @@ class AuthController implements AuthEndpoints {
             throw new ConflictError("User already exists.");
         }
 
+        const hashedPassword = await hashPassword(password);
+        user.password = hashedPassword;
+
         const newUser = await UserModel.create(user);
         const accessToken = getJWTToken(email);
 
+        const userResponse: UserResponse = {
+            _id: newUser._id,
+            email: newUser.email,
+            phoneNumber: newUser.phoneNumber,
+            name: newUser.name,
+            userType: newUser.userType,
+            dob: newUser.dob,
+            doctorId: newUser.doctorId,
+            locationId: newUser.locationId,
+        };
+
         const authResponse: AuthResponseJSON = {
             accessToken: accessToken,
-            user: newUser,
+            user: userResponse,
         };
         res.json(authResponse);
     }

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { getSecretkey } from "../config/jwtManager";
+import { getSecretkey } from "../utils/jwtManager";
 import { BadRequestError } from "../classes/errors/badRequestError";
 import { NextFunction } from "express";
 import { ForbiddenError } from "../classes/errors/forbiddenError";

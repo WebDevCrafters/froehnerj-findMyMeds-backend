@@ -8,7 +8,7 @@ interface User extends Document {
     name: string;
     userType: UserType;
     dob: number;
-    password?: string;
+    password: string;
     doctorId: Types.ObjectId;
     locationId: Types.ObjectId;
 }
