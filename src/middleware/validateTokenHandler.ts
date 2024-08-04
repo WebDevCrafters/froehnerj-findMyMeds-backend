@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import { getSecretkey } from "../utils/jwtManager";
 import { BadRequestError } from "../classes/errors/badRequestError";
-import { NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
-import { AuthRequest } from "../interfaces/requests/AuthRequest";
 import User from "../interfaces/schemaTypes/User";
+import { AuthRequest } from "../interfaces/requests/AuthRequest";
 
 export const validateTokenHandler = (
     req: AuthRequest,
