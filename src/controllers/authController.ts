@@ -12,8 +12,19 @@ import { getJWTToken } from "../config/jwtManager";
 
 class AuthController implements AuthEndpoints {
     public async signIn(req: AuthRequest, res: Response) {
-        const { email } = req.body.user;
-        const userFromDB: User | null = await UserModel.findById(email);
+        const user = req.body?.user;
+        if (!user) {
+            throw new BadRequestError("Invalid request body.");
+        }
+
+        const { email } = user;
+        if (!email) {
+            throw new BadRequestError("Invalid request body.");
+        }
+
+        const userFromDB: User | null = await UserModel.findOne({
+            email,
+        }).select("-password");
 
         if (!userFromDB) {
             throw new NotFoundError();
@@ -34,7 +45,7 @@ class AuthController implements AuthEndpoints {
         if (!user) {
             throw new BadRequestError("Invalid request body.");
         }
-        
+
         const { email, password, name, userType } = user;
         if (!(email && password && name && userType)) {
             throw new BadRequestError("Invalid request body.");
