@@ -9,9 +9,7 @@ const UserSchema: Schema<User> = new Schema({
     password: { type: String, required: true },
     dateOfBirth: { type: Date },
     zipCode: { type: String },
-    userType: { type: String, enum: Object.values(UserType), required: true },
-    doctorName: { type: String },
-    doctorEmail: { type: String },
+    userType: { type: String, enum: Object.values(UserType), required: true }
 });
 
 export default mongoose.model<User>("User", UserSchema);
