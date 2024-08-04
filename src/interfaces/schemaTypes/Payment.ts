@@ -1,10 +1,11 @@
-import { PaymentStatus } from "./enums/PaymentStatus";
+import { Types } from "mongoose";
+import PaymentStatus from "./enums/PaymentStatus";
 
-export interface Payment {
-    paymentId: string;
-    userId: string;
-    searchId: string;
-    amount: number;
+interface Payment extends Document {
+    userId: Types.ObjectId;
     status: PaymentStatus;
-    paymentDate: Date;
+    paidOn: number;
+    amount: string;
 }
+
+export default Payment;

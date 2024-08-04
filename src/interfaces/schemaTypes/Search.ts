@@ -1,11 +1,11 @@
-import { PaymentStatus } from "./enums/PaymentStatus";
+import { Types } from "mongoose";
 import { SearchStatus } from "./enums/SearchStatus";
 
-export interface Search {
-  searchId: string;
-  userId: string;
-  medications: string[];
-  packageId: string;
-  paymentStatus: PaymentStatus;
-  status: SearchStatus;
+interface Search extends Document {
+    patientId: Types.ObjectId;
+    clinicianId: Types.ObjectId;
+    medicationId: Types.ObjectId;
+    status: SearchStatus;
 }
+
+export default Search;

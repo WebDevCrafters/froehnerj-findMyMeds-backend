@@ -1,5 +1,5 @@
 export enum MedicationStatus {
-    NotStarted = 'Not Started',
+    Available = 'Available',
     InProgress = 'In Progress',
     Completed = 'Completed'
 }

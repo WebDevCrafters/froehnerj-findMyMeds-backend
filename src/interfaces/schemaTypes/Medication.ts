@@ -1,12 +1,9 @@
-import { MedicationStatus } from "./enums/MedicationStatus";
-
-export interface Medication {
-  medicationId: string;
-  name: string;
-  dose: string;
-  quantity: number;
-  brandName: string;
-  alternatives?: string[];
-  earliestPickupDate: Date;
-  status: MedicationStatus;
+interface Medication extends Document {
+    name: string;
+    dose: string;
+    quantity: number;
+    alternatives: string[];
+    pickUpDate: number;
 }
+
+export default Medication;

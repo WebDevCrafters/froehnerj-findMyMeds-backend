@@ -1,14 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { SearchStatus } from '../interfaces/schemaTypes/enums/SearchStatus';
-import { PaymentStatus } from '../interfaces/schemaTypes/enums/PaymentStatus';
-import { Search } from '../interfaces/schemaTypes/Search';
+import mongoose, { Schema } from "mongoose";
+import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
+import Search from "../interfaces/schemaTypes/Search";
 
-const SearchSchema: Schema = new Schema({
-    searchId: { type: String, required: true, unique: true },
-    medications: { type: [String], required: true },
-    packageId: { type: String, required: true },
-    paymentStatus: { type: String, enum: Object.values(PaymentStatus), required: true },
-    status: { type: String, enum: Object.values(SearchStatus), required: true }
+const SearchSchema: Schema<Search> = new Schema({
+    patientId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    clinicianId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    medicationId: {
+        type: Schema.Types.ObjectId,
+        ref: "Medication",
+        required: true,
+    },
+    status: { type: String, enum: Object.values(SearchStatus), required: true },
 });
 
-export default mongoose.model<Search>('Search', SearchSchema);
+export default mongoose.model<Search>("Search", SearchSchema);

@@ -1,13 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { PaymentStatus } from '../interfaces/schemaTypes/enums/PaymentStatus';
-import { Payment } from '../interfaces/schemaTypes/Payment';
+import mongoose, { Schema } from "mongoose";
+import Payment from "../interfaces/schemaTypes/Payment";
+import PaymentStatus from "../interfaces/schemaTypes/enums/PaymentStatus";
 
-const PaymentSchema: Schema = new Schema({
-    paymentId: { type: String, required: true, unique: true },
-    searchId: { type: String, required: true },
-    amount: { type: Number, required: true },
-    status: { type: String, enum: Object.values(PaymentStatus), required: true },
-    paymentDate: { type: Date, required: true }
+const PaymentSchema: Schema<Payment> = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    status: {
+        type: String,
+        enum: Object.values(PaymentStatus),
+        required: true,
+    },
+    paidOn: { type: Number, required: true },
+    amount: { type: String, required: true },
 });
 
-export default mongoose.model<Payment>('Payment', PaymentSchema);
+const Payment = mongoose.model<Payment>("Payment", PaymentSchema);

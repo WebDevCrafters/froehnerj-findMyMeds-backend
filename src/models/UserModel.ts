@@ -1,15 +1,16 @@
 import mongoose, { Schema } from "mongoose";
+import User from "../interfaces/schemaTypes/User";
 import { UserType } from "../interfaces/schemaTypes/enums/UserType";
-import { User } from "../interfaces/schemaTypes/User";
 
 const UserSchema: Schema<User> = new Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     phoneNumber: { type: String },
+    name: { type: String, required: true },
+    userType: { type: String, enum: Object.values(UserType), required: true },
+    dob: { type: Number },
     password: { type: String, required: true },
-    dateOfBirth: { type: Date },
-    zipCode: { type: String },
-    userType: { type: String, enum: Object.values(UserType), required: true }
+    doctorId: { type: Schema.Types.ObjectId, ref: "Doctor" },
+    locationId: { type: Schema.Types.ObjectId, ref: "Location" },
 });
 
 export default mongoose.model<User>("User", UserSchema);
