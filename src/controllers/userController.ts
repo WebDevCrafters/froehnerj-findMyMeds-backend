@@ -12,6 +12,7 @@ import { ForbiddenError } from "../classes/errors/forbiddenError";
 import UserResponse from "../interfaces/responses/UserResponse";
 import { comparePassword, hashPassword } from "../utils/bcryptManager";
 import { UnauthorizedError } from "../classes/errors/unauthorizedError";
+import mongoose from "mongoose";
 
 class UserController implements UserEndpoints {
     public async signIn(req: AuthRequest, res: Response) {
@@ -101,6 +102,56 @@ class UserController implements UserEndpoints {
             user: userResponse,
         };
         res.json(authResponse);
+    }
+
+    public async updateUser(req: AuthRequest, res: Response) {
+        const updateUser = req.body?.user;
+
+        if (!updateUser) throw new BadRequestError();
+
+        const { _id: userId } = updateUser;
+
+        if (!mongoose.isValidObjectId(userId)) {
+            throw new BadRequestError("Invalid user Id");
+        }
+
+        const updatedUser = await UserModel.findByIdAndUpdate(updateUser);
+
+        if (!updatedUser) throw new NotFoundError();
+
+        res.json(updatedUser);
+    }
+
+    public async getUser(req: AuthRequest, res: Response) {
+        const userReq = req.body?.user;
+
+        if (!userReq) throw new BadRequestError();
+
+        const { _id: userId, email } = userReq;
+
+        if (!userId && !email) throw new BadRequestError();
+
+        let userFromDB = null;
+        if (mongoose.isValidObjectId(userId)) {
+            userFromDB = await UserModel.findById(userId);
+        } else {
+            userFromDB = await UserModel.findOne({ email });
+        }
+
+        if (!userFromDB) throw new NotFoundError();
+
+        const userResponse: UserResponse = {
+            _id: userFromDB._id,
+            email: userFromDB.email,
+            phoneNumber: userFromDB.phoneNumber,
+            name: userFromDB.name,
+            userType: userFromDB.userType,
+            dob: userFromDB.dob,
+            doctorId: userFromDB.doctorId,
+            locationId: userFromDB.locationId,
+        };
+
+        res.json(userResponse);
     }
 }
 
