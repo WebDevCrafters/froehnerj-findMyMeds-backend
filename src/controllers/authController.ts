@@ -1,4 +1,4 @@
-import { AuthEndpoints } from "../interfaces/endpoints/authEndpoints";
+import { UserEndpoints } from "../interfaces/endpoints/authEndpoints";
 import { Request, Response } from "express";
 import { AuthRequest } from "../interfaces/requests/AuthRequest";
 import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
@@ -12,7 +12,7 @@ import { ForbiddenError } from "../classes/errors/forbiddenError";
 import UserResponse from "../interfaces/responses/UserResponse";
 import { comparePassword, hashPassword } from "../utils/bcryptManager";
 
-class AuthController implements AuthEndpoints {
+class UserController implements UserEndpoints {
     public async signIn(req: AuthRequest, res: Response) {
         const user = req.body?.user;
         if (!user) {
@@ -36,7 +36,7 @@ class AuthController implements AuthEndpoints {
             password,
             userFromDB.password
         );
-        
+
         if (!isPasswordMatch) {
             throw new ForbiddenError("Invalid email or password.");
         }
@@ -103,4 +103,4 @@ class AuthController implements AuthEndpoints {
     }
 }
 
-export const authController = new AuthController();
+export const userController = new UserController();

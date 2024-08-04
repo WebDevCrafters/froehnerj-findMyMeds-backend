@@ -1,13 +1,13 @@
-import { authController } from "../controllers/authController";
+import { userController } from "../controllers/authController";
 import express, { Request, Response } from "express";
 import asyncHandler from "../middleware/asyncHandler";
 import { validateUserType } from "../middleware/validateUserType";
 
-const authRouter = express.Router();
+const userRouter = express.Router();
 
-authRouter.route("/signin").post(asyncHandler(authController.signIn));
-authRouter
+userRouter.route("/signin").post(asyncHandler(userController.signIn));
+userRouter
     .route("/signup")
-    .post(validateUserType, asyncHandler(authController.signUp));
+    .post(validateUserType, asyncHandler(userController.signUp));
 
-export default authRouter;
+export default userRouter;

@@ -4,7 +4,7 @@ import { BadRequestError } from "../classes/errors/badRequestError";
 import { NextFunction } from "express";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
 import { AuthRequest } from "../interfaces/requests/AuthRequest";
-import { User } from "../interfaces/schemaTypes/User";
+import User from "../interfaces/schemaTypes/User";
 
 export const validateTokenHandler = (
     req: AuthRequest,
