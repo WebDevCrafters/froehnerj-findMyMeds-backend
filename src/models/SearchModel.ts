@@ -5,7 +5,6 @@ import { Search } from '../interfaces/schemaTypes/Search';
 
 const SearchSchema: Schema = new Schema({
     searchId: { type: String, required: true, unique: true },
-    userId: { type: String, required: true },
     medications: { type: [String], required: true },
     packageId: { type: String, required: true },
     paymentStatus: { type: String, enum: Object.values(PaymentStatus), required: true },

@@ -1,14 +1,14 @@
+import { Document } from "mongoose";
 import { UserType } from "./enums/UserType";
 
-export interface User {
-    userId: string;
+export interface User  extends Document{
     name: string;
     email: string;
-    phoneNumber: string;
     password: string;
-    dateOfBirth: Date;
-    zipCode: string;
     userType: UserType;
+    phoneNumber?: string;
+    dateOfBirth?: Date;
+    zipCode?: string;
     doctorName?: string;
     doctorEmail?: string;
 }

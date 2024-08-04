@@ -5,7 +5,7 @@ import asyncHandler from "../middleware/asyncHandler";
 const authRouter = express.Router();
 
 authRouter.route('/signin').post(asyncHandler(authController.signIn))
-authRouter.route('/signup').post(authController.signUp)
+authRouter.route('/signup').post(asyncHandler(authController.signUp))
 
 export default authRouter;
 
