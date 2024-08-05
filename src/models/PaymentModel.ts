@@ -13,4 +13,4 @@ const PaymentSchema: Schema<Payment> = new Schema({
     amount: { type: String, required: true },
 });
 
-const Payment = mongoose.model<Payment>("Payment", PaymentSchema);
+export default mongoose.model<Payment>("Payment", PaymentSchema);

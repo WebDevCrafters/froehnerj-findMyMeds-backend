@@ -9,4 +9,4 @@ const MedicationSchema: Schema<Medication> = new Schema({
     pickUpDate: { type: Number, required: true },
 });
 
-const Medication = mongoose.model<Medication>("Medication", MedicationSchema);
+export default mongoose.model<Medication>("Medication", MedicationSchema);
