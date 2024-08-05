@@ -5,7 +5,11 @@ const MedicationSchema: Schema<Medication> = new Schema({
     name: { type: String, required: true },
     dose: { type: String, required: true },
     quantity: { type: Number, required: true },
-    alternatives: { type: [String], required: true },
+    alternatives: [{
+        type: Schema.Types.ObjectId,
+        ref: "Medication",
+        required: true,
+    }],
     pickUpDate: { type: Number, required: true },
 });
 

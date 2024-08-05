@@ -1,8 +1,10 @@
+import { Types } from "mongoose";
+
 interface Medication extends Document {
     name: string;
     dose: string;
     quantity: number;
-    alternatives: string[];
+    alternatives: Types.ObjectId[];
     pickUpDate: number;
 }
 
