@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
-interface Medication extends Document {
+interface Medication {
+    _id: Types.ObjectId;
     name: string;
     dose: string;
     quantity: number;

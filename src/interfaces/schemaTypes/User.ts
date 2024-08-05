@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { UserType } from "./enums/UserType";
 
-interface User extends Document {
-    _id: string,
+interface User {
+    _id: string;
     email: string;
     phoneNumber: string;
     name: string;

@@ -1,7 +1,8 @@
 import { Types } from "mongoose";
 import PaymentStatus from "./enums/PaymentStatus";
 
-interface Payment extends Document {
+interface Payment {
+    _id: Types.ObjectId;
     userId: Types.ObjectId;
     status: PaymentStatus;
     paidOn: number;

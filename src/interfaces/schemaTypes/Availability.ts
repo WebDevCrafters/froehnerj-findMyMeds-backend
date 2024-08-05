@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
-interface Availability extends Document {
+interface Availability {
+    _id: Types.ObjectId;
     clinicianId: Types.ObjectId;
     searchId: Types.ObjectId;
 }

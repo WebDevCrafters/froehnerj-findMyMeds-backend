@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
 import { SearchStatus } from "./enums/SearchStatus";
 
-interface Search extends Document {
+interface Search {
+    _id: Types.ObjectId;
     patientId: Types.ObjectId;
-    clinicianId: Types.ObjectId;
     medicationId: Types.ObjectId;
     status: SearchStatus;
 }

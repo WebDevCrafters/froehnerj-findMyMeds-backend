@@ -1,6 +1,7 @@
-import { Document } from "mongoose";
+import { Types } from "mongoose";
 
-interface Location extends Document {
+interface Location {
+    _id: Types.ObjectId;
     zipCode: string;
     longitude: string;
     latitude: string;
