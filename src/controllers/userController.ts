@@ -170,6 +170,10 @@ class UserController implements UserEndpoints {
 
         res.json(userResponse);
     }
+
+    sendOTP(req: Request, res: Response) {}
+
+    verifyOTP(req: Request, res: Response) {}
 }
 
 export const userController = new UserController();

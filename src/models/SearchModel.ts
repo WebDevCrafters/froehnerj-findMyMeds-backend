@@ -8,7 +8,8 @@ const SearchSchema: Schema<Search> = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Medication",
         required: true,
-    }
+    },
+    status: { type: String, enum: Object.values(SearchStatus), required: true },
 });
 
 export default mongoose.model<Search>("Search", SearchSchema);
