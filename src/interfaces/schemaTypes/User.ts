@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { UserType } from "./enums/UserType";
 
 interface User {
-    _id: string;
+    _id: Types.ObjectId;
     email: string;
     phoneNumber: string;
     name: string;

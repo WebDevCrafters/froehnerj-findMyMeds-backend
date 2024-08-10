@@ -10,19 +10,23 @@ export const validateTokenHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    let accessToken = (req.headers as { authorization?: string }).authorization;
+    let accessToken = req.headers.authorization;
+
     if (!accessToken) {
-        throw new ForbiddenError("Invalid access token");
+        return next(new ForbiddenError("Invalid access token"));
     }
-    if (accessToken.startsWith("Bearer")) {
+
+    if (accessToken.startsWith("Bearer ")) {
         accessToken = accessToken.split(" ")[1];
     }
 
     const secretKey = getSecretkey();
+
     jwt.verify(accessToken, secretKey, (err, decoded) => {
         if (err) {
-            throw new BadRequestError("Invalid access token.");
+            return next(new BadRequestError("Invalid access token."));
         }
+        console.log({decoded})
 
         req.user = (decoded as { user: User }).user;
         next();

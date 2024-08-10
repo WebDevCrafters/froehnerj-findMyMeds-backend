@@ -1,10 +1,12 @@
 import { Types } from "mongoose";
 import { SearchStatus } from "./enums/SearchStatus";
+import User from "./User";
+import Medication from "./Medication";
 
 interface Search {
-    _id: Types.ObjectId;
-    patientId: Types.ObjectId;
-    medicationId: Types.ObjectId;
+    _id?: Types.ObjectId;
+    patient: Types.ObjectId | User;
+    medication: Types.ObjectId | Medication;
     status: SearchStatus;
 }
 

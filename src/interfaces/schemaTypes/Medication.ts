@@ -5,7 +5,7 @@ interface Medication {
     name: string;
     dose: string;
     quantity: number;
-    alternatives: Types.ObjectId[];
+    alternatives: (Types.ObjectId | Medication)[];
     pickUpDate: number;
 }
 

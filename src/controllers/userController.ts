@@ -42,7 +42,7 @@ class UserController implements UserEndpoints {
             throw new UnauthorizedError("Incorrect password.");
         }
 
-        const accessToken = getJWTToken(email);
+        const accessToken = getJWTToken(userFromDB);
 
         const userResponse: SecureUser = {
             _id: userFromDB._id,
@@ -83,7 +83,7 @@ class UserController implements UserEndpoints {
         user.password = hashedPassword;
 
         const newUser = await UserModel.create(user);
-        const accessToken = getJWTToken(email);
+        const accessToken = getJWTToken(newUser);
 
         const userResponse: SecureUser = {
             _id: newUser._id,

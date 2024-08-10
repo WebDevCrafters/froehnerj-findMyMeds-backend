@@ -2,14 +2,16 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { BadRequestError } from "../classes/errors/badRequestError";
 import { ServerError } from "../classes/errors/serverError";
+import User from "../interfaces/schemaTypes/User";
 
-export const getJWTToken = (email: string): string => {
+export const getJWTToken = (user: User): string => {
     const secretKey = getSecretkey();
 
     const token: string = jwt.sign(
         {
             user: {
-                email: email,
+                _id: user._id,
+                email: user.email,
             },
         },
         secretKey
