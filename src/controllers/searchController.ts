@@ -8,6 +8,7 @@ import { medicationController } from "./MedicationController";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import isMedication from "../utils/guards/isMedication";
 import { Types } from "mongoose";
+import medicationService from "../services/medication.service";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
@@ -16,7 +17,7 @@ class SearchController implements SearchEndpoints {
             throw new BadRequestError("Invalid medication");
 
         const insertedAlternatives: Medication[] =
-            await medicationController.insertMedicationBulk(
+            await medicationService.insertMedicationBulk(
                 medication.alternatives
             );
 
@@ -29,7 +30,7 @@ class SearchController implements SearchEndpoints {
             alternatives: alternativesIds,
         };
 
-        const newMedication = await medicationController.insertMedication(
+        const newMedication = await medicationService.insertMedication(
             medicationToAdd
         );
 
