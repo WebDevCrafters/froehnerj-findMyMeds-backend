@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import PaymentStatus from "./enums/PaymentStatus";
 
 interface Payment {
-    _id: Types.ObjectId;
+    paymentId: Types.ObjectId;
     userId: Types.ObjectId;
     status: PaymentStatus;
     paidOn: number;

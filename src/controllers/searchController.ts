@@ -10,48 +10,7 @@ import isMedication from "../utils/guards/isMedication";
 import { Types } from "mongoose";
 
 class SearchController implements SearchEndpoints {
-    async add(req: Request, res: Response) {
-        const medication: Medication = req.body as unknown as Medication;
-        const { userId: userId } = req.user;
-        if (!medication) throw new BadRequestError();
-
-        let insertedAlternatives: Medication[] = [];
-        let insertedAlternativesIds: Types.ObjectId[] = [];
-
-        if (medication.alternatives) {
-            for (let alternative of medication.alternatives) {
-                if (!isMedication(alternative)) continue;
-
-                const insertedAlternative =
-                    await medicationController.insertedMedication(alternative);
-
-                insertedAlternatives.push(insertedAlternative);
-                insertedAlternativesIds.push(insertedAlternative._id);
-            }
-
-            medication.alternatives = insertedAlternativesIds;
-        }
-
-        const insertedMedication =
-            await medicationController.insertedMedication(medication);
-        const insertedMedicationId = insertedMedication._id;
-
-        const searchDocument: Search = {
-            medication: insertedMedicationId,
-            patient: userId,
-            status: SearchStatus.InProgress,
-        };
-
-        const newSearch = await SearchModel.create(searchDocument);
-
-        const searchPopulated: Search = {
-            ...newSearch,
-            medication: insertedMedication,
-            patient: userId,
-        };
-
-        res.json(searchPopulated);
-    }
+    async add(req: Request, res: Response) {}
 
     delete(req: Request, res: Response) {}
 

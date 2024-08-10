@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 interface Medication {
-    _id: Types.ObjectId;
+    medicationId: Types.ObjectId;
     name: string;
     dose: string;
     quantity: number;

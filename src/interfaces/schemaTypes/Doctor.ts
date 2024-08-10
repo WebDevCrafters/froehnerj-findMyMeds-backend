@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 interface Doctor {
-    _id: Types.ObjectId;
+    doctorId: Types.ObjectId;
     name: string;
     email: string;
 }

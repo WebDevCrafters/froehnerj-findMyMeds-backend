@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 interface Availability {
-    _id: Types.ObjectId;
+    availabilityId: Types.ObjectId;
     clinicianId: Types.ObjectId;
     searchId: Types.ObjectId;
 }
