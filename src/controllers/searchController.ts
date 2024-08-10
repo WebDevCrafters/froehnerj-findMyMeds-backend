@@ -47,7 +47,7 @@ class SearchController implements SearchEndpoints {
         let newSearch: Search = {
             medication: newMedication.medicationId,
             patient: user.userId,
-            status: SearchStatus.NotStarted,
+            status: SearchStatus.Completed,
         };
 
         let searchResult = await searchService.insertSearch(newSearch);
@@ -59,7 +59,9 @@ class SearchController implements SearchEndpoints {
 
     async getMySearches(req: Request, res: Response) {
         const user = req.user;
-        const searchesRes = await searchService.getSearchByUserId(user.userId);
+        const status = req.query.status as SearchStatus;
+        console.log(status)
+        const searchesRes = await searchService.getSearchByUserId(user.userId, status);
         res.json(searchesRes);
     }
 

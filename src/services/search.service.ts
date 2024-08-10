@@ -3,6 +3,7 @@ import Search from "../interfaces/schemaTypes/Search";
 import SearchModel from "../models/SearchModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import Medication from "../interfaces/schemaTypes/Medication";
+import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 
 class SearchService {
     async insertSearch(search: Search): Promise<Search> {
@@ -17,8 +18,8 @@ class SearchService {
         };
     }
 
-    async getSearchByUserId(userId: Types.ObjectId) {
-        const searches = await SearchModel.find({ patient: userId })
+    async getSearchByUserId(userId: Types.ObjectId, status: SearchStatus) {
+        const searches = await SearchModel.find({ patient: userId, status: status })
             .select("-__v")
             .populate({
                 path: "medication",
