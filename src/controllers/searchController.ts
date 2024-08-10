@@ -57,13 +57,15 @@ class SearchController implements SearchEndpoints {
         res.json(searchResult);
     }
 
+    async getMySearches(req: Request, res: Response) {
+        const user = req.user;
+        const searchesRes = await searchService.getSearchByUserId(user.userId);
+        res.json(searchesRes);
+    }
+
     delete(req: Request, res: Response) {}
 
-    getActive(req: Request, res: Response) {}
-
     getNearBy(req: Request, res: Response) {}
-
-    getPrevious(req: Request, res: Response) {}
 
     markAsAvailable(req: Request, res: Response) {}
 
