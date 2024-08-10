@@ -18,7 +18,7 @@ class SearchService {
         };
     }
 
-    async getSearchByUserId(userId: Types.ObjectId, status: SearchStatus) {
+    async getSearches(userId: Types.ObjectId, status: SearchStatus) {
         const searches = await SearchModel.find({ patient: userId, status: status })
             .select("-__v")
             .populate({
