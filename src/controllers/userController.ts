@@ -45,7 +45,7 @@ class UserController implements UserEndpoints {
         const accessToken = getJWTToken(userFromDB);
 
         const userResponse: SecureUser = {
-            _id: userFromDB._id,
+            userId: userFromDB._id,
             email: userFromDB.email,
             phoneNumber: userFromDB.phoneNumber,
             name: userFromDB.name,
@@ -86,7 +86,7 @@ class UserController implements UserEndpoints {
         const accessToken = getJWTToken(newUser);
 
         const userResponse: SecureUser = {
-            _id: newUser._id,
+            userId: newUser._id,
             email: newUser.email,
             phoneNumber: newUser.phoneNumber,
             name: newUser.name,
@@ -130,7 +130,7 @@ class UserController implements UserEndpoints {
         if (!updatedUser) throw new NotFoundError();
 
         const userResult: SecureUser = {
-            _id: updatedUser._id,
+            userId: updatedUser._id,
             dob: updatedUser.dob,
             doctorId: updatedUser.doctorId,
             email: updatedUser.email,
@@ -158,7 +158,7 @@ class UserController implements UserEndpoints {
         if (!userFromDB) throw new NotFoundError();
 
         const userResponse: SecureUser = {
-            _id: userFromDB._id,
+            userId: userFromDB._id,
             email: userFromDB.email,
             phoneNumber: userFromDB.phoneNumber,
             name: userFromDB.name,

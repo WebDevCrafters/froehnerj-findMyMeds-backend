@@ -26,9 +26,12 @@ export const validateTokenHandler = (
         if (err) {
             return next(new BadRequestError("Invalid access token."));
         }
-        console.log({decoded})
-
-        req.user = (decoded as { user: User }).user;
+        console.log({ decoded });
+        const decodedUser = (decoded as { user: User }).user;
+        req.user = {
+            ...decodedUser,
+            userId: decodedUser._id,
+        };
         next();
     });
 };

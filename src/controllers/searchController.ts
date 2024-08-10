@@ -12,7 +12,7 @@ import { Types } from "mongoose";
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
         const medication: Medication = req.body as unknown as Medication;
-        const { _id: userId } = req.user;
+        const { userId: userId } = req.user;
         if (!medication) throw new BadRequestError();
 
         let insertedAlternatives: Medication[] = [];

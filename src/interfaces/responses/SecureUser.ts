@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { UserType } from "../schemaTypes/enums/UserType";
 
 interface SecureUser {
-    _id: Types.ObjectId;
+    userId: Types.ObjectId;
     email: string;
     phoneNumber: string;
     name: string;
