@@ -9,10 +9,14 @@ import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import isMedication from "../utils/guards/isMedication";
 import { Types } from "mongoose";
 import medicationService from "../services/medication.service";
+import searchService from "../services/search.service";
+import SecureUser from "../interfaces/responses/SecureUser";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
         const medication: Medication = req.body;
+        const user: SecureUser = req.user;
+
         if (!isMedication(medication))
             throw new BadRequestError("Invalid medication");
 
@@ -36,7 +40,21 @@ class SearchController implements SearchEndpoints {
 
         newMedication.alternatives = insertedAlternatives;
 
-        res.json(newMedication);
+        /** 
+           @todo: Search status according to payment status
+        **/
+
+        let newSearch: Search = {
+            medication: newMedication.medicationId,
+            patient: user.userId,
+            status: SearchStatus.NotStarted,
+        };
+
+        let searchResult = await searchService.insertSearch(newSearch);
+
+        searchResult.medication = newMedication;
+
+        res.json(searchResult);
     }
 
     delete(req: Request, res: Response) {}
