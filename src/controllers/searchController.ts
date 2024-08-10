@@ -10,7 +10,33 @@ import isMedication from "../utils/guards/isMedication";
 import { Types } from "mongoose";
 
 class SearchController implements SearchEndpoints {
-    async add(req: Request, res: Response) {}
+    async add(req: Request, res: Response) {
+        const medication: Medication = req.body;
+        if (!isMedication(medication))
+            throw new BadRequestError("Invalid medication");
+
+        const insertedAlternatives: Medication[] =
+            await medicationController.insertMedicationBulk(
+                medication.alternatives
+            );
+
+        const alternativesIds: Types.ObjectId[] = insertedAlternatives.map(
+            (alternative) => alternative.medicationId
+        );
+
+        const medicationToAdd: Medication = {
+            ...medication,
+            alternatives: alternativesIds,
+        };
+
+        const newMedication = await medicationController.insertMedication(
+            medicationToAdd
+        );
+
+        newMedication.alternatives = insertedAlternatives;
+
+        res.json(newMedication);
+    }
 
     delete(req: Request, res: Response) {}
 

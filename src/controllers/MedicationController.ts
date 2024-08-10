@@ -10,14 +10,20 @@ class MedicationController implements MedicationEndpoints {
     delete(req: Request, res: Response) {}
     update(req: Request, res: Response) {}
 
-    async insertedMedication(medication: Medication): Promise<Medication> {
-        const { name, pickUpDate } = medication;
-
-        if (!name || !pickUpDate) throw new BadRequestError();
+    async insertMedication(medication: Medication): Promise<Medication> {
+        if (!isMedication(medication))
+            throw new BadRequestError("Invalid medication");
 
         const insertedMedication = await MedicationModel.create(medication);
-
-        return insertedMedication;
+        const { _id, __v, medicationId, ...rest } =
+            insertedMedication.toObject() as Medication & {
+                __v?: number;
+                _id: Types.ObjectId;
+            };
+        return {
+            medicationId: _id,
+            ...rest,
+        };
     }
 
     async insertMedicationBulk(
@@ -25,7 +31,7 @@ class MedicationController implements MedicationEndpoints {
     ): Promise<Medication[]> {
         for (let medication of medications) {
             if (!isMedication(medication))
-                throw new BadRequestError("Invalid alternative");
+                throw new BadRequestError("Invalid medication");
         }
 
         const newMedications = await MedicationModel.insertMany(medications);
