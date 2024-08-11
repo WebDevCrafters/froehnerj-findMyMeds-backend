@@ -4,7 +4,7 @@ import PaymentStatus from "../interfaces/schemaTypes/enums/PaymentStatus";
 
 const PaymentSchema: Schema<Payment> = new Schema({
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    subscriptionId: {
+    subscription: {
         type: Schema.Types.ObjectId,
         ref: "Subscription",
         required: true,

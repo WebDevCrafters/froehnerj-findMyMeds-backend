@@ -5,6 +5,7 @@ import userRouter from "./routes/userRoutes";
 import errorHandler from "./middleware/errorHandler";
 import searchRouter from "./routes/searchRoutes";
 import subscriptionRouter from "./routes/subscriptionRoutes";
+import paymentRouter from "./routes/paymentRoutes";
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/subscription", subscriptionRouter);
+app.use("/api/payment", paymentRouter);
 app.use(errorHandler);
 
 export default app;

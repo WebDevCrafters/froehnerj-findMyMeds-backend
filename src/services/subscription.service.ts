@@ -26,7 +26,7 @@ class SubscriptionService {
     ) {
         try {
             const result = await SubscriptionModel.insertMany(subscriptions);
-            return result.map((doc) => this.parseSubscription(doc));
+            return result.map((doc) => this.makeDocToSubscription(doc));
         } catch (error) {
             console.error("An error occurred during bulk insertion:", error);
             throw error;
@@ -36,7 +36,9 @@ class SubscriptionService {
     async getAllSubscriptions(): Promise<Subscription[]> {
         try {
             const subscriptionDocs = await SubscriptionModel.find().exec();
-            return subscriptionDocs.map((doc) => this.parseSubscription(doc));
+            return subscriptionDocs.map((doc) =>
+                this.makeDocToSubscription(doc)
+            );
         } catch (error) {
             throw new Error("Failed to retrieve subscriptions: " + error);
         }
@@ -48,7 +50,7 @@ class SubscriptionService {
             if (!subscriptionDoc) {
                 throw new Error(`Subscription with ID ${id} not found`);
             }
-            return this.parseSubscription(subscriptionDoc);
+            return this.makeDocToSubscription(subscriptionDoc);
         } catch (error) {
             throw new Error("Failed to retrieve subscription: " + error);
         }
@@ -67,7 +69,7 @@ class SubscriptionService {
             if (!updatedDoc) {
                 throw new Error(`Subscription with ID ${id} not found`);
             }
-            return this.parseSubscription(updatedDoc);
+            return this.makeDocToSubscription(updatedDoc);
         } catch (error) {
             throw new Error("Failed to update subscription: " + error);
         }
@@ -108,12 +110,11 @@ class SubscriptionService {
         }
     }
 
-    private parseSubscription(
-        doc:
-            | Document<unknown, {}, Subscription> &
-                  Subscription & {
-                      _id: Types.ObjectId;
-                  }
+    public makeDocToSubscription(
+        doc: Document<unknown, {}, Subscription> &
+            Subscription & {
+                _id: Types.ObjectId;
+            }
     ): Subscription {
         return {
             subscriptionId: doc._id,

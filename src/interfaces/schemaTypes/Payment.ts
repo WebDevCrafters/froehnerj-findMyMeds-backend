@@ -1,12 +1,13 @@
 import { Types } from "mongoose";
 import PaymentStatus from "./enums/PaymentStatus";
+import Subscription from "./Subscription";
 
 interface Payment {
-    paymentId: Types.ObjectId;
+    paymentId?: Types.ObjectId;
     userId: Types.ObjectId;
-    subscriptionId: Types.ObjectId;
-    status: PaymentStatus;
-    paidOn: number;
+    subscription: Types.ObjectId | Subscription;
+    status?: PaymentStatus;
+    paidOn?: number;
 }
 
 export default Payment;

@@ -1,5 +1,4 @@
 export enum UserType {
-    Patient = 'Patient',
-    Clinician = 'Clinician'
-  }
-  
+    Patient = "Patient",
+    Clinician = "Clinician",
+}
