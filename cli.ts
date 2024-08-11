@@ -4,7 +4,8 @@ import readline from "readline";
 import connectToDB from "./src/config/dbConnection";
 import dotenv from "dotenv";
 import { SearchStatus } from "./src/interfaces/schemaTypes/enums/SearchStatus";
-import PackageStatus from "./src/interfaces/schemaTypes/enums/PackageStatus";
+import SubscriptionStatus from "./src/interfaces/schemaTypes/enums/SubscriptionStatus";
+import subscriptionService from "./src/services/subscription.service";
 dotenv.config();
 
 const program = new Command();
@@ -42,7 +43,7 @@ program
             const parsedCost = parseFloat(cost);
             const parsedSearchCount = parseInt(searchCount, 10);
             const parsedStatus =
-                PackageStatus[status as keyof typeof PackageStatus];
+                SubscriptionStatus[status as keyof typeof SubscriptionStatus];
 
             if (isNaN(parsedCost) || parsedCost <= 0) {
                 console.error("Invalid cost. Please enter a positive number.");
@@ -59,7 +60,7 @@ program
             if (!parsedStatus) {
                 console.error(
                     `Invalid status. Available statuses are: ${Object.values(
-                        PackageStatus
+                        SubscriptionStatus
                     ).join(", ")}`
                 );
                 return;
@@ -71,6 +72,14 @@ program
                 console.log(`Cost: ${parsedCost}`);
                 console.log(`Search Count: ${parsedSearchCount}`);
                 console.log(`Status: ${parsedStatus}`);
+
+                const newSubs = await subscriptionService.insertSubscription(
+                    name,
+                    parsedCost,
+                    parsedSearchCount,
+                    parsedStatus
+                );
+                console.log("Added subscription ", { newSubs });
             } catch (error) {
                 console.error(
                     "An error occurred while adding the subscription:",
@@ -104,7 +113,7 @@ program
                 name?: string;
                 cost?: number;
                 searchCount?: number;
-                status?: PackageStatus;
+                status?: SubscriptionStatus;
             }
         ) => {
             // Handle the update based on the provided options
@@ -116,7 +125,7 @@ program
 async function startCLI() {
     try {
         console.log("FindMyMeds CLI Connecting to database...");
-        // await connectToDB();
+        await connectToDB();
         displayCommands();
 
         const rl = readline.createInterface({
@@ -139,7 +148,7 @@ async function startCLI() {
         function main() {
             rl.question(
                 "\nEnter a command (or press q to quit): ",
-                (answer) => {
+                async (answer) => {
                     if (answer.trim() === "q") {
                         console.log("Exiting...");
                         rl.close();
@@ -150,7 +159,7 @@ async function startCLI() {
                     const args = answer.trim().split(" ");
 
                     try {
-                        program.parse(args, { from: "user" });
+                        await program.parseAsync(args, { from: "user" });
                     } catch (error) {
                         console.error("An error occurred:", error);
                     }
