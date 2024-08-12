@@ -58,6 +58,7 @@ class PyamentService {
             paidOn: paymentDoc.paidOn,
             paymentId: paymentDoc._id,
             status: paymentDoc.status,
+            searchesConsumed: paymentDoc.searchesConsumed
         };
     }
 }

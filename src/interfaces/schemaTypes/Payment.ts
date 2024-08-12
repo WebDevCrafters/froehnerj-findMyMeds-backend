@@ -8,6 +8,7 @@ interface Payment {
     subscription: Types.ObjectId | Subscription;
     status?: PaymentStatus;
     paidOn?: number;
+    searchesConsumed: number;
 }
 
 export default Payment;

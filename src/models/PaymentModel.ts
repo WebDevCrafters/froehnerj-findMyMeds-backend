@@ -15,6 +15,7 @@ const PaymentSchema: Schema<Payment> = new Schema({
         required: true,
     },
     paidOn: { type: Number },
+    searchesConsumed: { type: Number, default: 0, required: true },
 });
 
 export default mongoose.model<Payment>("Payment", PaymentSchema);
