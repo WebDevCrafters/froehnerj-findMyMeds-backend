@@ -1,0 +1,13 @@
+import express from "express";
+import { validateTokenHandler } from "../middleware/validateTokenHandler";
+import asyncHandler from "../middleware/asyncHandler";
+import availabilityService from "../services/availability.service";
+import availabilityController from "../controllers/availabilityController";
+
+const availabilityRouter = express.Router();
+
+availabilityRouter.use(validateTokenHandler);
+availabilityRouter.route("/").post(asyncHandler(availabilityController.add));
+availabilityRouter.route("/:id").delete(asyncHandler(availabilityController.remove));
+
+export default availabilityRouter;
