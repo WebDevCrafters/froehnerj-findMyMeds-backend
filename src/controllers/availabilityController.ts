@@ -5,6 +5,7 @@ import AvailabilityModel from "../models/AvailabilityModel";
 import availabilityService from "../services/availability.service";
 import { ServerError } from "../classes/errors/serverError";
 import mongoose, { isValidObjectId, Types } from "mongoose";
+import isAvailability from "../utils/guards/isAvailibility";
 
 class AvailabilityController implements AvailablityEndpoints {
     async add(req: Request, res: Response) {
@@ -14,6 +15,8 @@ class AvailabilityController implements AvailablityEndpoints {
         if (!availability) throw new BadRequestError();
 
         availability.clinicianId = user.userId;
+
+        if (!isAvailability(availability)) throw new BadRequestError();
 
         const insertedAvailability =
             await availabilityService.insertAvailability(availability);

@@ -3,6 +3,7 @@ import Availability from "../interfaces/schemaTypes/Availability";
 import AvailabilityModel from "../models/AvailabilityModel";
 import { Server } from "http";
 import { ServerError } from "../classes/errors/serverError";
+import { NotFoundError } from "../classes/errors/notFoundError";
 
 class AvailabilityService {
     async insertAvailability(
@@ -31,11 +32,12 @@ class AvailabilityService {
         options?: { session?: ClientSession }
     ) {
         const deleteRes = await AvailabilityModel.deleteOne(
-            { availabilityId },
+            { _id: availabilityId },
             { session: options?.session }
         );
 
-        if (!deleteRes || deleteRes.deletedCount > 1) throw new ServerError();
+        if (!deleteRes || !deleteRes.acknowledged) throw new ServerError();
+        if (deleteRes.deletedCount < 1) throw new NotFoundError();
 
         return deleteRes;
     }
