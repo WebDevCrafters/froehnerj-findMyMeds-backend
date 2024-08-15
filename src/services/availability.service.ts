@@ -1,9 +1,11 @@
-import { ClientSession, Types } from "mongoose";
+import { ClientSession, Document, isValidObjectId, Types } from "mongoose";
 import Availability from "../interfaces/schemaTypes/Availability";
 import AvailabilityModel from "../models/AvailabilityModel";
 import { Server } from "http";
 import { ServerError } from "../classes/errors/serverError";
 import { NotFoundError } from "../classes/errors/notFoundError";
+import userService from "./user.service";
+import SecureUser from "../interfaces/responses/SecureUser";
 
 class AvailabilityService {
     async insertAvailability(
@@ -40,6 +42,46 @@ class AvailabilityService {
         if (deleteRes.deletedCount < 1) throw new NotFoundError();
 
         return deleteRes;
+    }
+
+    async getAvailabilityBySearchId(id: string) {
+        const availabilities = await AvailabilityModel.find({ search: id })
+            .populate("clinician")
+            .select("-password");
+        if (!availabilities) throw new ServerError();
+
+        return availabilities.map((doc) => this.makeDocToAvailibility(doc));
+    }
+
+    makeDocToAvailibility(
+        doc: Document<unknown, {}, Availability> &
+            Availability & {
+                _id: Types.ObjectId;
+            }
+    ) {
+        const { _id, __v, availabilityId, clinician, ...rest } =
+            doc.toObject() as Availability & {
+                _id: Types.ObjectId;
+                __v: number;
+            };
+        let user = clinician;
+        if (!isValidObjectId(clinician)) {
+            const { _id, __v, userId, password, ...rest } =
+                clinician as SecureUser & {
+                    _id: Types.ObjectId;
+                    __v: number;
+                    password: string;
+                };
+            user = {
+                userId: _id,
+                ...rest,
+            };
+        }
+        return {
+            availabilityId: _id,
+            clinician: user,
+            ...rest,
+        };
     }
 }
 

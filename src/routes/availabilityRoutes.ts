@@ -8,6 +8,11 @@ const availabilityRouter = express.Router();
 
 availabilityRouter.use(validateTokenHandler);
 availabilityRouter.route("/").post(asyncHandler(availabilityController.add));
-availabilityRouter.route("/:id").delete(asyncHandler(availabilityController.remove));
+availabilityRouter
+    .route("/:id")
+    .delete(asyncHandler(availabilityController.remove));
+availabilityRouter
+    .route("/:searchId")
+    .get(asyncHandler(availabilityController.getAvailabilityBySearchId));
 
 export default availabilityRouter;

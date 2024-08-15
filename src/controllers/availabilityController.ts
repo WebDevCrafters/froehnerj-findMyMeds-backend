@@ -12,9 +12,13 @@ class AvailabilityController implements AvailablityEndpoints {
         const availability = req.body;
         const user = req.user;
 
+        /**
+            @todo: Check if user is a clinician
+         */
+
         if (!availability) throw new BadRequestError();
 
-        availability.clinicianId = user.userId;
+        availability.clinician = user.userId;
 
         if (!isAvailability(availability)) throw new BadRequestError();
 
@@ -35,6 +39,17 @@ class AvailabilityController implements AvailablityEndpoints {
         if (!deleteRes) throw new ServerError();
 
         res.json("Removed availability " + id);
+    }
+
+    async getAvailabilityBySearchId(req: Request, res: Response) {
+        const { searchId } = req.params;
+
+        if (!searchId) throw new BadRequestError();
+
+        const avalabilities =
+            await availabilityService.getAvailabilityBySearchId(searchId);
+
+        res.json(avalabilities);
     }
 }
 

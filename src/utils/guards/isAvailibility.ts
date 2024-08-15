@@ -5,7 +5,7 @@ function isAvailability(object: any): object is Availability {
     return (
         object &&
         typeof object === "object" &&
-        "clinicianId" in object &&
+        "clinician" in object &&
         "search" in object
     );
 }

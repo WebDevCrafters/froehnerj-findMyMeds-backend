@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import Availability from "../interfaces/schemaTypes/Availability";
 
 const AvailabilitySchema: Schema<Availability> = new Schema({
-    clinicianId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+    clinician: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     search: { type: Schema.Types.ObjectId, required: true, ref: "Search" },
 });
 
