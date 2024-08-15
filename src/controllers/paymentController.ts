@@ -45,7 +45,7 @@ class PaymentController implements PaymentsEndpoints {
         res.json(updatedPayment);
     }
 
-    async getPayments(req: Request, res: Response) {
+    async getAllPayments(req: Request, res: Response) {
         const user = req.user;
 
         if (!isValidObjectId(user.userId))
@@ -58,6 +58,19 @@ class PaymentController implements PaymentsEndpoints {
         if (!payments || !payments.length) throw new NotFoundError();
 
         res.json(payments);
+    }
+
+    async getPayments(req: Request, res: Response) {
+        const user = req.user;
+
+        if (!isValidObjectId(user.userId))
+            throw new ForbiddenError("Invalid access token user");
+
+        const payment = await paymentService.getPaymentByUserId(user.userId);
+
+        if (!payment) throw new NotFoundError();
+
+        res.json(payment);
     }
 }
 
