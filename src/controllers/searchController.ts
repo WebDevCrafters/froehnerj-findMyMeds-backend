@@ -7,62 +7,115 @@ import SearchModel from "../models/SearchModel";
 import { medicationController } from "./MedicationController";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import isMedication from "../utils/guards/isMedication";
-import { Types } from "mongoose";
+import mongoose, { ClientSession, Types } from "mongoose";
 import medicationService from "../services/medication.service";
 import searchService from "../services/search.service";
 import SecureUser from "../interfaces/responses/SecureUser";
+import paymentService from "../services/payment.service";
+import Payment from "../interfaces/schemaTypes/Payment";
+import { ServerError } from "../classes/errors/serverError";
+import PaymentStatus from "../interfaces/schemaTypes/enums/PaymentStatus";
+import isSubscription from "../utils/guards/isSubscription";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
-        const medication: Medication = req.body;
-        const user: SecureUser = req.user;
+        const session: ClientSession = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const medication: Medication = req.body;
+            const user: SecureUser = req.user;
 
-        if (!isMedication(medication))
-            throw new BadRequestError("Invalid medication");
+            /**
+                @todo: Check user payment 
+            */
 
-        const insertedAlternatives: Medication[] =
-            await medicationService.insertMedicationBulk(
-                medication.alternatives
+            if (!isMedication(medication))
+                throw new BadRequestError("Invalid medication");
+
+            const insertedAlternatives: Medication[] =
+                await medicationService.insertMedicationBulk(
+                    medication.alternatives,
+                    { session }
+                );
+
+            const alternativesIds: Types.ObjectId[] = insertedAlternatives.map(
+                (alternative) => alternative.medicationId
             );
 
-        const alternativesIds: Types.ObjectId[] = insertedAlternatives.map(
-            (alternative) => alternative.medicationId
-        );
+            const medicationToAdd: Medication = {
+                ...medication,
+                alternatives: alternativesIds,
+            };
 
-        const medicationToAdd: Medication = {
-            ...medication,
-            alternatives: alternativesIds,
-        };
+            const newMedication = await medicationService.insertMedication(
+                medicationToAdd,
+                { session }
+            );
 
-        const newMedication = await medicationService.insertMedication(
-            medicationToAdd
-        );
+            newMedication.alternatives = insertedAlternatives;
 
-        newMedication.alternatives = insertedAlternatives;
+            /** 
+                @todo: Search status according to payment status
+            **/
 
-        /** 
-           @todo: Search status according to payment status
-        **/
+            let newSearch: Search = {
+                medication: newMedication.medicationId,
+                patient: user.userId,
+                status: SearchStatus.Completed,
+            };
 
-        let newSearch: Search = {
-            medication: newMedication.medicationId,
-            patient: user.userId,
-            status: SearchStatus.Completed,
-        };
+            let searchResult = await searchService.insertSearch(newSearch, {
+                session,
+            });
 
-        let searchResult = await searchService.insertSearch(newSearch);
+            const prevPayment = await paymentService.getPaymentByUserId(
+                user.userId
+            );
 
-        searchResult.medication = newMedication;
+            if (prevPayment.status === PaymentStatus.UNPAID)
+                throw new BadRequestError("User payment status is unpaid");
 
-        res.json(searchResult);
+            let subscriptionId = null;
+
+            if (isSubscription(prevPayment.subscription)) {
+                subscriptionId = prevPayment.subscription.subscriptionId;
+            }
+
+            if (!subscriptionId)
+                throw new BadRequestError("User does not have a subscriptoin");
+
+            const updatePaymentReq: Payment = {
+                ...prevPayment,
+                subscription: subscriptionId,
+                searchesConsumed: prevPayment.searchesConsumed - 1,
+            };
+
+            const newPayment = await paymentService.updatePayment(
+                updatePaymentReq,
+                { session }
+            );
+
+            searchResult.medication = newMedication;
+            await session.commitTransaction();
+
+            res.json(searchResult);
+        } catch (error) {
+            await session.abortTransaction();
+            throw new ServerError(JSON.stringify(error));
+        } finally {
+            session.endSession();
+        }
     }
 
     async getMySearches(req: Request, res: Response) {
         const user = req.user;
         const status = req.query.status as SearchStatus;
 
-        const searchesRes = await searchService.getSearches(user.userId, status);
-        
+        const searchesRes = await searchService.getSearches(
+            user.userId,
+            status
+        );
+
         res.json(searchesRes);
     }
 

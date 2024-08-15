@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import Search from "../interfaces/schemaTypes/Search";
 import SearchModel from "../models/SearchModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
@@ -6,8 +6,14 @@ import Medication from "../interfaces/schemaTypes/Medication";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 
 class SearchService {
-    async insertSearch(search: Search): Promise<Search> {
-        const newSearch = await SearchModel.create(search);
+    async insertSearch(
+        search: Search,
+        options?: { session?: ClientSession }
+    ): Promise<Search> {
+        const newSearchArr = await SearchModel.create([search], {
+            session: options?.session,
+        });
+        const newSearch = newSearchArr[0];
         const { _id, __v, ...rest } = newSearch.toObject() as Search & {
             __v?: number;
             _id: Types.ObjectId;
@@ -19,7 +25,10 @@ class SearchService {
     }
 
     async getSearches(userId: Types.ObjectId, status: SearchStatus) {
-        const searches = await SearchModel.find({ patient: userId, status: status })
+        const searches = await SearchModel.find({
+            patient: userId,
+            status: status,
+        })
             .select("-__v")
             .populate({
                 path: "medication",
