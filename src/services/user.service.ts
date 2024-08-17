@@ -4,6 +4,7 @@ import SecureUser from "../interfaces/responses/SecureUser";
 import Location from "../interfaces/responses/Location";
 import { BadRequestError } from "../classes/errors/badRequestError";
 import dotenv from "dotenv";
+import { ServerError } from "../classes/errors/serverError";
 dotenv.config();
 
 class UserService {
@@ -46,7 +47,9 @@ class UserService {
                     longitude: location.lng,
                 };
             } else {
-                throw new BadRequestError(`Geocoding failed with status: ${data.status}`);
+                throw new ServerError(
+                    `Geocoding failed with status: ${data.status}`
+                );
             }
         } catch (error) {
             throw new BadRequestError(
