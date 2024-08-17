@@ -4,6 +4,8 @@ import { BadRequestError } from "../classes/errors/badRequestError";
 import { NextFunction, Request, Response } from "express";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
 import User from "../interfaces/schemaTypes/User";
+import SecureUser from "../interfaces/responses/SecureUser";
+import { Types } from "mongoose";
 
 export const validateTokenHandler = (
     req: Request,
@@ -26,7 +28,9 @@ export const validateTokenHandler = (
         if (err) {
             return next(new BadRequestError("Invalid access token."));
         }
-        const decodedUser = (decoded as { user: User }).user;
+        const decodedUser = (
+            decoded as { user: SecureUser & { _id: Types.ObjectId } }
+        ).user;
         req.user = {
             ...decodedUser,
             userId: decodedUser._id,

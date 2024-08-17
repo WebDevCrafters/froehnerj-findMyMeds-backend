@@ -12,6 +12,10 @@ import { comparePassword, hashPassword } from "../utils/bcryptManager";
 import { UnauthorizedError } from "../classes/errors/unauthorizedError";
 import mongoose from "mongoose";
 import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
+import isLocation from "../utils/guards/isLocation";
+import userService from "../services/user.service";
+import { convertToDBLocation } from "../interfaces/responses/Location";
+import { convertToLocation } from "../interfaces/schemaTypes/DBLocation";
 
 class UserController implements UserEndpoints {
     public async signIn(req: Request, res: Response) {
@@ -43,7 +47,7 @@ class UserController implements UserEndpoints {
         }
 
         const accessToken = getJWTToken(userFromDB);
-
+        const location = convertToLocation(user.location);
         const userResponse: SecureUser = {
             userId: userFromDB._id,
             email: userFromDB.email,
@@ -52,7 +56,7 @@ class UserController implements UserEndpoints {
             userType: userFromDB.userType,
             dob: userFromDB.dob,
             doctorId: userFromDB.doctorId,
-            locationId: userFromDB.locationId,
+            location: location,
         };
 
         const responseBody: AuthResponseJSON = {
@@ -69,8 +73,8 @@ class UserController implements UserEndpoints {
             throw new BadRequestError("Invalid request body.");
         }
 
-        const { email, password, name, userType } = user;
-        if (!(email && password && name && userType)) {
+        let { email, password, name, userType, location, zipCode } = user;
+        if (!(email && password && name && userType && zipCode)) {
             throw new BadRequestError("Invalid request body.");
         }
 
@@ -78,6 +82,12 @@ class UserController implements UserEndpoints {
         if (userFromDB) {
             throw new ConflictError("User already exists.");
         }
+
+        if (!isLocation(location)) {
+            location = await userService.getUserCoordinates(zipCode);
+        }
+        const dbLocation = convertToDBLocation(location);
+        user.location = dbLocation;
 
         const hashedPassword = await hashPassword(password);
         user.password = hashedPassword;
@@ -93,7 +103,7 @@ class UserController implements UserEndpoints {
             userType: newUser.userType,
             dob: newUser.dob,
             doctorId: newUser.doctorId,
-            locationId: newUser.locationId,
+            location: location,
         };
 
         const authResponse: AuthResponseJSON = {
@@ -128,13 +138,13 @@ class UserController implements UserEndpoints {
         );
 
         if (!updatedUser) throw new NotFoundError();
-
+        const location = convertToLocation(updatedUser.location);
         const userResult: SecureUser = {
             userId: updatedUser._id,
             dob: updatedUser.dob,
             doctorId: updatedUser.doctorId,
             email: updatedUser.email,
-            locationId: updatedUser.locationId,
+            location: location,
             name: updatedUser.name,
             phoneNumber: updatedUser.phoneNumber,
             userType: updatedUser.userType,
@@ -156,7 +166,7 @@ class UserController implements UserEndpoints {
         }
 
         if (!userFromDB) throw new NotFoundError();
-
+        const location = convertToLocation(userFromDB.location);
         const userResponse: SecureUser = {
             userId: userFromDB._id,
             email: userFromDB.email,
@@ -165,7 +175,7 @@ class UserController implements UserEndpoints {
             userType: userFromDB.userType,
             dob: userFromDB.dob,
             doctorId: userFromDB.doctorId,
-            locationId: userFromDB.locationId,
+            location: location,
         };
 
         res.json(userResponse);

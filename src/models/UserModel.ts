@@ -10,7 +10,20 @@ const UserSchema: Schema<User> = new Schema({
     dob: { type: Number },
     password: { type: String, required: true },
     doctorId: { type: Schema.Types.ObjectId, ref: "Doctor" },
-    locationId: { type: Schema.Types.ObjectId, ref: "Location" },
+    zipCode: { type: Number, required: true },
+    location: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            required: true,
+        },
+        coordinates: {
+            type: [Number],
+            required: true,
+        },
+    },
 });
+
+UserSchema.index({ location: "2dsphere" });
 
 export default mongoose.model<User>("User", UserSchema);

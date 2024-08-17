@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { UserType } from "./enums/UserType";
+import DBLocation from "./DBLocation";
 
 interface User {
     _id: Types.ObjectId;
@@ -9,8 +10,9 @@ interface User {
     userType: UserType;
     dob: number;
     password: string;
+    zipCode: number;
     doctorId: Types.ObjectId;
-    locationId: Types.ObjectId;
+    location: DBLocation;
 }
 
 export default User;
