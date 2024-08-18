@@ -29,9 +29,7 @@ class UserController implements UserEndpoints {
             throw new BadRequestError("Invalid request body.");
         }
 
-        const userFromDB: User | null = await UserModel.findOne({
-            email,
-        });
+        const userFromDB: User | null = await userService.getUser(email);
 
         if (!userFromDB) {
             throw new NotFoundError();
@@ -47,7 +45,7 @@ class UserController implements UserEndpoints {
         }
 
         const accessToken = getJWTToken(userFromDB);
-        const location = convertToLocation(user.location);
+        const location = convertToLocation(userFromDB.location);
         const userResponse: SecureUser = {
             userId: userFromDB._id,
             email: userFromDB.email,
@@ -78,7 +76,7 @@ class UserController implements UserEndpoints {
             throw new BadRequestError("Invalid request body.");
         }
 
-        const userFromDB = await UserModel.findOne({ email: email });
+        const userFromDB = await userService.getSecureUser(email);
         if (userFromDB) {
             throw new ConflictError("User already exists.");
         }
@@ -158,27 +156,9 @@ class UserController implements UserEndpoints {
 
         if (!idetifier) throw new BadRequestError();
 
-        let userFromDB = null;
-        if (mongoose.isValidObjectId(idetifier)) {
-            userFromDB = await UserModel.findById(idetifier);
-        } else {
-            userFromDB = await UserModel.findOne({ email: idetifier });
-        }
-
-        if (!userFromDB) throw new NotFoundError();
-        const location = convertToLocation(userFromDB.location);
-        const userResponse: SecureUser = {
-            userId: userFromDB._id,
-            email: userFromDB.email,
-            phoneNumber: userFromDB.phoneNumber,
-            name: userFromDB.name,
-            userType: userFromDB.userType,
-            dob: userFromDB.dob,
-            doctorId: userFromDB.doctorId,
-            location: location,
-        };
-
-        res.json(userResponse);
+        const secureUser = await userService.getSecureUser(idetifier);
+        if (!secureUser) throw new NotFoundError();
+        res.json(secureUser);
     }
 
     sendOTP(req: Request, res: Response) {}
