@@ -5,6 +5,7 @@ import { NotFoundError } from "../classes/errors/notFoundError";
 import Medication from "../interfaces/schemaTypes/Medication";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import UserModel from "../models/UserModel";
+import userService from "./user.service";
 
 class SearchService {
     async insertSearch(
@@ -91,27 +92,11 @@ class SearchService {
             throw new NotFoundError("User location not found");
         }
 
-        const radiusRadians = radiusMiles / 3963.2; // Convert miles to radians (Earth's radius in miles)
-
-        // Find users within the 30-mile radius of the requesting user
-        const nearbyUsers = await UserModel.find({
-            _id:{$ne: userId},
-            location: {
-                $geoWithin: {
-                    $centerSphere: [
-                        requestingUser.location.coordinates,
-                        radiusRadians,
-                    ],
-                },
-            },
-        }).select("_id");
-
-        if (!nearbyUsers || nearbyUsers.length === 0) {
-            throw new NotFoundError("No nearby users found");
-        }
-
-        // Extract user IDs of the nearby users
-        const nearbyUserIds = nearbyUsers.map((user) => user._id);
+        const nearbyUserIds = await userService.getUserIdsWithinRadius(
+            userId,
+            requestingUser.location.coordinates,
+            radiusMiles
+        );
 
         // Find searches related to these users
         const searches = await SearchModel.find({

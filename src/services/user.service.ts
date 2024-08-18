@@ -96,6 +96,33 @@ class UserService {
             );
         }
     }
+
+    async getUserIdsWithinRadius(
+        userId: Types.ObjectId,
+        requestUserCoordinates: number[],
+        radiusMiles: number
+    ) {
+        const radiusRadians = radiusMiles / 3963.2; // Convert miles to radians (Earth's radius in miles)
+
+        // Find users within the 30-mile radius of the requesting user
+        const nearbyUsers = await UserModel.find({
+            _id: { $ne: userId },
+            location: {
+                $geoWithin: {
+                    $centerSphere: [requestUserCoordinates, radiusRadians],
+                },
+            },
+        }).select("_id");
+
+        if (!nearbyUsers || nearbyUsers.length === 0) {
+            throw new NotFoundError("No nearby users found");
+        }
+
+        // Extract user IDs of the nearby users
+        const nearbyUserIds = nearbyUsers.map((user) => user._id);
+
+        return nearbyUserIds;
+    }
 }
 
 export default new UserService();

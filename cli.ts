@@ -6,8 +6,11 @@ import dotenv from "dotenv";
 import SubscriptionStatus from "./src/interfaces/schemaTypes/enums/SubscriptionStatus";
 import subscriptionService from "./src/services/subscription.service";
 import defaultSubscriptions from "./src/utils/defaultSubscriptions";
+import pharmacyService from "./src/services/pharmacy.service";
 
 dotenv.config();
+export const PHARMACY_EXCEL_PATH = "./src/assets/Pharmacies_USA.csv";
+export const BATCH_SIZE = 1000;
 
 const program = new Command();
 
@@ -27,6 +30,35 @@ const parseStatus = (status: string) => {
     }
     return parsedStatus;
 };
+
+program
+    .command("seed-pharmacies")
+    .description("Insert pharmacies data from excel to database")
+    .action(async () => {
+        try {
+            console.log("Please wait, inserting 99,660 records..");
+            const readData =
+                pharmacyService.readDataFromExcel(PHARMACY_EXCEL_PATH);
+            const formattedData = pharmacyService.transFormData(readData);
+            await pharmacyService.insertInBatchBulk(formattedData, BATCH_SIZE);
+        } catch (error) {
+            handleError(error);
+        }
+    });
+
+program
+    .command("seed-subscription")
+    .description("Insert default packages into the database")
+    .action(async () => {
+        try {
+            await subscriptionService.bulkInsertSubscriptions(
+                defaultSubscriptions
+            );
+            console.log("Default packages have been inserted.");
+        } catch (error) {
+            handleError(error);
+        }
+    });
 
 program
     .command("add-subscription")
@@ -168,32 +200,6 @@ program
             console.log(
                 `All subscriptions have been marked as ${parsedStatus}.`
             );
-        } catch (error) {
-            handleError(error);
-        }
-    });
-
-program
-    .command("delete-all-subscriptions")
-    .description("Remove all subscriptions")
-    .action(async () => {
-        try {
-            await subscriptionService.deleteAllSubscriptions();
-            console.log("All subscriptions have been deleted.");
-        } catch (error) {
-            handleError(error);
-        }
-    });
-
-program
-    .command("seed-subscription")
-    .description("Insert default packages into the database")
-    .action(async () => {
-        try {
-            await subscriptionService.bulkInsertSubscriptions(
-                defaultSubscriptions
-            );
-            console.log("Default packages have been inserted.");
         } catch (error) {
             handleError(error);
         }
