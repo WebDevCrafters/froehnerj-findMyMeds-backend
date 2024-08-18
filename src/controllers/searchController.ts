@@ -87,7 +87,7 @@ class SearchController implements SearchEndpoints {
             const updatePaymentReq: Payment = {
                 ...prevPayment,
                 subscription: subscriptionId,
-                searchesConsumed: prevPayment.searchesConsumed - 1,
+                searchesConsumed: prevPayment.searchesConsumed + 1,
             };
 
             const newPayment = await paymentService.updatePayment(
@@ -100,11 +100,8 @@ class SearchController implements SearchEndpoints {
 
             res.json(searchResult);
         } catch (error) {
-            /**
-                @todo: handle error here
-             */
             await session.abortTransaction();
-            throw new ServerError(JSON.stringify(error));
+            throw error;
         } finally {
             session.endSession();
         }
