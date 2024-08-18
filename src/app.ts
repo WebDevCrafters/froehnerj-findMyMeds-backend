@@ -7,6 +7,7 @@ import searchRouter from "./routes/searchRoutes";
 import subscriptionRouter from "./routes/subscriptionRoutes";
 import paymentRouter from "./routes/paymentRoutes";
 import availabilityRouter from "./routes/availabilityRoutes";
+import pharmacyRouter from "./routes/pharmacyRoutes";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ app.use("/api/search", searchRouter);
 app.use("/api/subscription", subscriptionRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/availability", availabilityRouter);
+app.use("/api/pharmacies", pharmacyRouter);
 app.use(errorHandler);
 
 export default app;

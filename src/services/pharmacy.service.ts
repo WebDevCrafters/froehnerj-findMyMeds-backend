@@ -3,8 +3,11 @@ import PharmacyModel from "../models/PharmacyModel";
 import XLSX from "xlsx";
 import userService from "./user.service";
 import { BadRequestError } from "../classes/errors/badRequestError";
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 import { NotFoundError } from "../classes/errors/notFoundError";
+import DBLocation, {
+    convertToLocation,
+} from "../interfaces/schemaTypes/DBLocation";
 
 class PharmacyService {
     readDataFromExcel(filePath: string) {
@@ -21,7 +24,8 @@ class PharmacyService {
             name: row["Pharmacy Name"],
             address: row["Full Address"],
             phoneNumber: row["Phone Number 1"],
-            faxNumber: row["Fax Number 1"],
+            faxNumber:
+                row["Fax Number 1"] === "--" ? null : row["Fax Number 1"],
             url: row["URL"],
             authorizedOfficialName: row["Authorized Official Name"],
             authorizedOfficialContactNumber:
@@ -69,7 +73,29 @@ class PharmacyService {
         if (!nearByPharmacies || nearByPharmacies.length === 0)
             throw new NotFoundError("No pharmacies found");
 
-        return nearByPharmacies;
+        return nearByPharmacies.map((doc) => this.formatPharmacy(doc));
+    }
+
+    formatPharmacy(
+        doc: Document<unknown, {}, Pharmacy> &
+            Pharmacy & {
+                _id: Types.ObjectId;
+            }
+    ): Pharmacy {
+        const {
+            _id,
+            __v,
+            location: dbLocation,
+            pharmacyId,
+            ...rest
+        } = doc.toObject() as Pharmacy & { __v?: number; _id: Types.ObjectId };
+
+        const location = convertToLocation(dbLocation as DBLocation);
+        return {
+            pharmacyId: _id,
+            location: location,
+            ...rest,
+        };
     }
 }
 
