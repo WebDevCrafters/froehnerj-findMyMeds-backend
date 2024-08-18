@@ -7,5 +7,6 @@ const searchRouter = express.Router()
 searchRouter.use(validateTokenHandler);
 searchRouter.route("/add").post(asyncHandler(searchController.add));
 searchRouter.route("/").get(asyncHandler(searchController.getMySearches));
+searchRouter.route("/radius").get(asyncHandler(searchController.getSearchInRedius));
 
 export default searchRouter;

@@ -61,7 +61,7 @@ class SearchController implements SearchEndpoints {
             let newSearch: Search = {
                 medication: newMedication.medicationId,
                 patient: user.userId,
-                status: SearchStatus.Completed,
+                status: SearchStatus.InProgress,
             };
 
             let searchResult = await searchService.insertSearch(newSearch, {
@@ -72,7 +72,7 @@ class SearchController implements SearchEndpoints {
                 user.userId
             );
 
-            if (prevPayment.status === PaymentStatus.UNPAID)
+            if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)
                 throw new BadRequestError("User payment status is unpaid");
 
             let subscriptionId = null;
@@ -100,6 +100,9 @@ class SearchController implements SearchEndpoints {
 
             res.json(searchResult);
         } catch (error) {
+            /**
+                @todo: handle error here
+             */
             await session.abortTransaction();
             throw new ServerError(JSON.stringify(error));
         } finally {
@@ -117,6 +120,17 @@ class SearchController implements SearchEndpoints {
         );
 
         res.json(searchesRes);
+    }
+
+    async getSearchInRedius(req: Request, res: Response) {
+        const user = req.user;
+        const searches = await searchService.getSearchesInRadius(
+            user.userId,
+            30,
+            SearchStatus.InProgress
+        );
+
+        res.json(searches);
     }
 
     delete(req: Request, res: Response) {}

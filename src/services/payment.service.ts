@@ -39,13 +39,16 @@ class PyamentService {
         return allPayments.map((doc) => this.makeDocToPayment(doc));
     }
 
-    async getPaymentByUserId(userId: Types.ObjectId): Promise<Payment> {
+    async getPaymentByUserId(userId: Types.ObjectId): Promise<Payment | null> {
+        /**
+            @todo: Get only payments which searchCOnsumed is less than subscription searchCount
+         */
+
         const payment = await PaymentModel.findOne({
             userId,
-            searchesConsumed: { $gt: 0 },
         }).populate("subscription");
 
-        if (!payment) throw new NotFoundError();
+        if (!payment) return null;
 
         return this.makeDocToPayment(payment);
     }
