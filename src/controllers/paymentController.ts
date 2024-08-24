@@ -3,10 +3,12 @@ import { BadRequestError } from "../classes/errors/badRequestError";
 import PaymentsEndpoints from "../interfaces/endpoints/paymentEndpoints";
 import paymentService from "../services/payment.service";
 import isPayment from "../utils/guards/isPayment";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
 import Payment from "../interfaces/schemaTypes/Payment";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
+import Subscription from "../interfaces/schemaTypes/Subscription";
+import subscriptionService from "../services/subscription.service";
 
 class PaymentController implements PaymentsEndpoints {
     async addPayment(req: Request, res: Response): Promise<void> {
@@ -14,6 +16,7 @@ class PaymentController implements PaymentsEndpoints {
         const user = req.user;
         payment.userId = user.userId;
         payment.searchesConsumed = 0;
+        payment.paidOn = Date.now();
 
         if (!isPayment(payment)) throw new BadRequestError();
 
@@ -22,11 +25,15 @@ class PaymentController implements PaymentsEndpoints {
             !isValidObjectId(payment.subscription)
         )
             throw new BadRequestError("Invalid ObjectId");
-        /**
-            @todo: check if subscription exists
-         */
-        const newPayment = await paymentService.insertPayment(payment);
 
+        const subscription = payment.subscription as Types.ObjectId;
+        const subscriptionObj: Subscription | null =
+            await subscriptionService.getSubscriptionById(subscription);
+        if (!subscriptionObj)
+            throw new BadRequestError("Subscription does not exist.");
+
+        const newPayment = await paymentService.insertPayment(payment);
+        newPayment.subscription = subscriptionObj;
         res.json(newPayment);
     }
 
