@@ -8,11 +8,19 @@ import subscriptionRouter from "./routes/subscriptionRoutes";
 import paymentRouter from "./routes/paymentRoutes";
 import availabilityRouter from "./routes/availabilityRoutes";
 import pharmacyRouter from "./routes/pharmacyRoutes";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 connectToDB();
 
+const corsOrigin = process.env.CORS_ORIGIN;
+app.use(
+    cors({
+        origin: corsOrigin,
+        methods: "GET,POST,PUT,DELETE",
+    })
+);
 app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/search", searchRouter);
