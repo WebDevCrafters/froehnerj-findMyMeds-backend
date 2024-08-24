@@ -64,12 +64,13 @@ program
     .command("add-subscription")
     .description("Add a new subscription")
     .requiredOption("--name <name>", "Subscription name")
+    .requiredOption("--desc <desc>", "Subscription description")
     .requiredOption("--cost <cost>", "Subscription cost")
     .requiredOption("--searchCount <searchCount>", "Number of searches")
     .requiredOption("--status <status>", "Subscription status")
     .action(async (options) => {
         try {
-            const { name, cost, searchCount, status } = options;
+            const { name, desc, cost, searchCount, status } = options;
             const parsedCost = parseFloat(cost);
             const parsedSearchCount = parseInt(searchCount, 10);
             const parsedStatus = parseStatus(status);
@@ -87,6 +88,7 @@ program
 
             console.log("Adding subscription with the following details:");
             console.log(`Name: ${name}`);
+            console.log(`Name: ${desc}`);
             console.log(`Cost: ${parsedCost}`);
             console.log(`Search Count: ${parsedSearchCount}`);
             console.log(`Status: ${parsedStatus}`);
@@ -94,6 +96,7 @@ program
             const newSubscription =
                 await subscriptionService.insertSubscription(
                     name,
+                    desc,
                     parsedCost,
                     parsedSearchCount,
                     parsedStatus

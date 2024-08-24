@@ -4,6 +4,7 @@ import SubscriptionStatus from "../interfaces/schemaTypes/enums/SubscriptionStat
 
 const SubscriptionSchema: Schema<Subscription> = new Schema({
     name: { type: String, required: true },
+    description: { type: String },
     cost: { type: Number, required: true },
     searchCount: { type: Number, required: true },
     status: {

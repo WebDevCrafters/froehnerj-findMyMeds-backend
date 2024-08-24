@@ -6,12 +6,14 @@ import SubscriptionModel from "../models/SubscriptionModel";
 class SubscriptionService {
     async insertSubscription(
         name: string,
+        desc: string,
         cost: number,
         searchCount: number,
         status: SubscriptionStatus
     ): Promise<Subscription> {
         const subs: Subscription = {
             name,
+            description: desc,
             cost,
             searchCount,
             status,
@@ -44,7 +46,7 @@ class SubscriptionService {
         }
     }
 
-    async getSubscriptionById(id: string): Promise<Subscription | null> {
+    async getSubscriptionById(id: string|Types.ObjectId): Promise<Subscription | null> {
         try {
             const subscriptionDoc = await SubscriptionModel.findById(id).exec();
             if (!subscriptionDoc) {
@@ -119,6 +121,7 @@ class SubscriptionService {
         return {
             subscriptionId: doc._id,
             name: doc.name,
+            description: doc.description,
             cost: doc.cost,
             searchCount: doc.searchCount,
             status: doc.status,
