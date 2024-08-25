@@ -16,15 +16,17 @@ import Payment from "../interfaces/schemaTypes/Payment";
 import { ServerError } from "../classes/errors/serverError";
 import PaymentStatus from "../interfaces/schemaTypes/enums/PaymentStatus";
 import isSubscription from "../utils/guards/isSubscription";
+import { convertToDBLocation } from "../interfaces/responses/Location";
+import isLocation from "../utils/guards/isLocation";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
         const session: ClientSession = await mongoose.startSession();
         session.startTransaction();
         try {
-            const medication: Medication = req.body;
+            const search: Search = req.body;
             const user: SecureUser = req.user;
-
+            const medication = search.medication;
             /**
                 @todo: Check user payment 
             */
@@ -47,6 +49,11 @@ class SearchController implements SearchEndpoints {
                 alternatives: alternativesIds,
             };
 
+            if (!isLocation(search.location))
+                throw new BadRequestError("Invalid location");
+
+            const location = convertToDBLocation(search.location);
+
             const newMedication = await medicationService.insertMedication(
                 medicationToAdd,
                 { session }
@@ -62,6 +69,9 @@ class SearchController implements SearchEndpoints {
                 medication: newMedication.medicationId,
                 patient: user.userId,
                 status: SearchStatus.InProgress,
+                location: location,
+                prescriberName: search.prescriberName,
+                zipCode: search.zipCode,
             };
 
             let searchResult = await searchService.insertSearch(newSearch, {

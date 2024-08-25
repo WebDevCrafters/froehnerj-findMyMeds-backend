@@ -10,6 +10,19 @@ const SearchSchema: Schema<Search> = new Schema({
         required: true,
     },
     status: { type: String, enum: Object.values(SearchStatus), required: true },
+    location: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            required: true,
+        },
+        coordinates: {
+            type: [Number],
+            required: true,
+        },
+    },
+    zipCode: { type: Number, required: true },
+    prescriberName: { type: String },
 });
 
 export default mongoose.model<Search>("Search", SearchSchema);
