@@ -1,4 +1,4 @@
-import { ClientSession, Types } from "mongoose";
+import { ClientSession, Document, Types } from "mongoose";
 import Search from "../interfaces/schemaTypes/Search";
 import SearchModel from "../models/SearchModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
@@ -6,6 +6,7 @@ import Medication from "../interfaces/schemaTypes/Medication";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import UserModel from "../models/UserModel";
 import userService from "./user.service";
+import DBLocation from "../interfaces/schemaTypes/DBLocation";
 
 class SearchService {
     async insertSearch(
@@ -81,76 +82,41 @@ class SearchService {
     }
 
     async getSearchesInRadius(
-        userId: Types.ObjectId,
-        radiusMiles: number,
-        status: SearchStatus
+        requestUserCoordinates: number[],
+        radiusMiles: number
     ) {
-        const requestingUser = await UserModel.findById(userId).select(
-            "location"
-        );
-        if (!requestingUser || !requestingUser.location) {
-            throw new NotFoundError("User location not found");
-        }
+        const radiusRadians = radiusMiles / 3963.2;
 
-        const nearbyUserIds = await userService.getUserIdsWithinRadius(
-            userId,
-            requestingUser.location.coordinates,
-            radiusMiles
-        );
-
-        // Find searches related to these users
-        const searches = await SearchModel.find({
-            patient: { $in: nearbyUserIds },
-            status: status,
-        })
-            .select("-__v")
-            .populate({
-                path: "medication",
-                select: "-__v",
-                populate: {
-                    path: "alternatives",
-                    model: "Medication",
-                    select: "-__v",
+        const nearbySearches = await SearchModel.find({
+            status: SearchStatus.InProgress,
+            location: {
+                $geoWithin: {
+                    $centerSphere: [requestUserCoordinates, radiusRadians],
                 },
-            });
-
-        if (!searches || searches.length === 0)
-            throw new NotFoundError("No searches found");
-
-        const searchArrResult = searches.map((search) => {
-            let { _id, ...searchRes } = search.toObject();
-            searchRes.searchId = _id;
-
-            if (searchRes.medication) {
-                let { _id, ...medication } =
-                    searchRes.medication as Medication & {
-                        _id: Types.ObjectId;
-                    };
-
-                medication.medicationId = _id;
-                searchRes.medication = medication;
-            }
-
-            if (searchRes.medication.alternatives?.length) {
-                const formattedAlternatives =
-                    searchRes.medication.alternatives.map((ele) => {
-                        let { _id, ...alternative } = ele as Medication & {
-                            _id: Types.ObjectId;
-                        };
-                        alternative.medicationId = _id;
-                        return alternative;
-                    });
-                searchRes.medication.alternatives = formattedAlternatives;
-            }
-
-            /**
-                @todo: Send status also 
-            */
-
-            return searchRes;
+            },
         });
 
-        return searchArrResult;
+        if (!nearbySearches || nearbySearches.length === 0) {
+            throw new NotFoundError("No nearby searches found");
+        }
+
+        return nearbySearches.map((doc) => this.makeSearchFromDoc(doc));
+    }
+
+    makeSearchFromDoc(
+        searchDoc: Document<unknown, {}, Search> &
+            Search & {
+                _id: Types.ObjectId;
+            }
+    ): Search {
+        const { _id, __v, ...rest } = searchDoc.toObject() as Search & {
+            __v?: number;
+            _id: Types.ObjectId;
+        };
+        return {
+            searchId: _id,
+            ...rest,
+        };
     }
 }
 

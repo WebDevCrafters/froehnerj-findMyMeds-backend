@@ -18,6 +18,7 @@ import PaymentStatus from "../interfaces/schemaTypes/enums/PaymentStatus";
 import isSubscription from "../utils/guards/isSubscription";
 import { convertToDBLocation } from "../interfaces/responses/Location";
 import isLocation from "../utils/guards/isLocation";
+import userService from "../services/user.service";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
@@ -27,9 +28,8 @@ class SearchController implements SearchEndpoints {
             const search: Search = req.body;
             const user: SecureUser = req.user;
             const medication = search.medication;
-            /**
-                @todo: Check user payment 
-            */
+
+            if (!search.zipCode) throw new BadRequestError("Invalid zipCode");
 
             if (!isMedication(medication))
                 throw new BadRequestError("Invalid medication");
@@ -50,7 +50,9 @@ class SearchController implements SearchEndpoints {
             };
 
             if (!isLocation(search.location))
-                throw new BadRequestError("Invalid location");
+                search.location = await userService.getCoordinates(
+                    search.zipCode
+                );
 
             const location = convertToDBLocation(search.location);
 
@@ -81,6 +83,10 @@ class SearchController implements SearchEndpoints {
             const prevPayment = await paymentService.getPaymentByUserId(
                 user.userId
             );
+
+            /**
+                @todo: different function increse searchConsumed
+             */
 
             if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)
                 throw new BadRequestError("User payment status is unpaid");
@@ -131,10 +137,21 @@ class SearchController implements SearchEndpoints {
 
     async getSearchInRedius(req: Request, res: Response) {
         const user = req.user;
+
+        const userFromDB = await userService.getSecureUser(user.userId);
+
+        if (!userFromDB) throw new BadRequestError("Invalid access token");
+
+        const dBLocation = convertToDBLocation(userFromDB.location);
+
+        /**
+            @todo: get 30 from client
+         */
+
         const searches = await searchService.getSearchesInRadius(
             user.userId,
-            30,
-            SearchStatus.InProgress
+            dBLocation.coordinates,
+            30
         );
 
         res.json(searches);
