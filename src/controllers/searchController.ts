@@ -34,6 +34,10 @@ class SearchController implements SearchEndpoints {
             if (!isMedication(medication))
                 throw new BadRequestError("Invalid medication");
 
+            /**
+                @todo: Keep alternatives as optional
+            */
+
             const insertedAlternatives: Medication[] =
                 await medicationService.insertMedicationBulk(
                     medication.alternatives,
