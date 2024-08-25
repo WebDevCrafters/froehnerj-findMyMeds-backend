@@ -67,7 +67,7 @@ class UserService {
         };
     }
 
-    async getUserCoordinates(zipCode: number): Promise<Location> {
+    async getCoordinates(zipCode: number): Promise<Location> {
         try {
             const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${this.GOOGLE_MAPS_API_KEY}`

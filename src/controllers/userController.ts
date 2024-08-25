@@ -82,7 +82,7 @@ class UserController implements UserEndpoints {
         }
 
         if (!isLocation(location)) {
-            location = await userService.getUserCoordinates(zipCode);
+            location = await userService.getCoordinates(zipCode);
         }
         const dbLocation = convertToDBLocation(location);
         user.location = dbLocation;
