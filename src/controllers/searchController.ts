@@ -33,6 +33,8 @@ class SearchController implements SearchEndpoints {
 
             if (!isMedication(medication))
                 throw new BadRequestError("Invalid medication");
+            
+            if (!medication.alternatives) medication.alternatives = [];
 
             /**
                 @todo: Keep alternatives as optional
