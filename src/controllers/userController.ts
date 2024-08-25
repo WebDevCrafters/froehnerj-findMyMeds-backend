@@ -55,6 +55,7 @@ class UserController implements UserEndpoints {
             dob: userFromDB.dob,
             doctorId: userFromDB.doctorId,
             location: location,
+            zipCode: userFromDB.zipCode,
         };
 
         const responseBody: AuthResponseJSON = {
@@ -102,6 +103,7 @@ class UserController implements UserEndpoints {
             dob: newUser.dob,
             doctorId: newUser.doctorId,
             location: location,
+            zipCode: user.zipCode,
         };
 
         const authResponse: AuthResponseJSON = {
@@ -146,6 +148,7 @@ class UserController implements UserEndpoints {
             name: updatedUser.name,
             phoneNumber: updatedUser.phoneNumber,
             userType: updatedUser.userType,
+            zipCode: updatedUser.zipCode,
         };
 
         res.json(userResult);

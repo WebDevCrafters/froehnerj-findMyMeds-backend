@@ -33,12 +33,12 @@ class SearchController implements SearchEndpoints {
 
             if (!isMedication(medication))
                 throw new BadRequestError("Invalid medication");
-            
+
             if (!medication.alternatives) medication.alternatives = [];
 
-            /**
-                @todo: Keep alternatives as optional
-            */
+            const prevPayment = await paymentService.getPaymentByUserId(
+                user.userId
+            );
 
             const insertedAlternatives: Medication[] =
                 await medicationService.insertMedicationBulk(
@@ -82,40 +82,40 @@ class SearchController implements SearchEndpoints {
                 zipCode: search.zipCode,
             };
 
+            if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)
+                newSearch.status = SearchStatus.NotStarted;
+
             let searchResult = await searchService.insertSearch(newSearch, {
                 session,
             });
-
-            const prevPayment = await paymentService.getPaymentByUserId(
-                user.userId
-            );
 
             /**
                 @todo: different function increse searchConsumed
              */
 
-            if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)
-                throw new BadRequestError("User payment status is unpaid");
-
             let subscriptionId = null;
 
-            if (isSubscription(prevPayment.subscription)) {
-                subscriptionId = prevPayment.subscription.subscriptionId;
+            if (prevPayment && prevPayment.status !== PaymentStatus.UNPAID) {
+                if (isSubscription(prevPayment.subscription)) {
+                    subscriptionId = prevPayment.subscription.subscriptionId;
+                }
+
+                if (!subscriptionId)
+                    throw new BadRequestError(
+                        "User does not have a subscriptoin"
+                    );
+
+                const updatePaymentReq: Payment = {
+                    ...prevPayment,
+                    subscription: subscriptionId,
+                    searchesConsumed: prevPayment.searchesConsumed + 1,
+                };
+
+                const newPayment = await paymentService.updatePayment(
+                    updatePaymentReq,
+                    { session }
+                );
             }
-
-            if (!subscriptionId)
-                throw new BadRequestError("User does not have a subscriptoin");
-
-            const updatePaymentReq: Payment = {
-                ...prevPayment,
-                subscription: subscriptionId,
-                searchesConsumed: prevPayment.searchesConsumed + 1,
-            };
-
-            const newPayment = await paymentService.updatePayment(
-                updatePaymentReq,
-                { session }
-            );
 
             searchResult.medication = newMedication;
             await session.commitTransaction();

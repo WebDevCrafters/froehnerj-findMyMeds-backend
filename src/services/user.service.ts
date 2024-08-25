@@ -34,6 +34,7 @@ class UserService {
             dob: userFromDB.dob,
             doctorId: userFromDB.doctorId,
             location: location,
+            zipCode: userFromDB.zipCode,
         };
 
         return userResponse;
