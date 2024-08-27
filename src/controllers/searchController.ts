@@ -19,6 +19,7 @@ import isSubscription from "../utils/guards/isSubscription";
 import { convertToDBLocation } from "../interfaces/responses/Location";
 import isLocation from "../utils/guards/isLocation";
 import userService from "../services/user.service";
+import { NotFoundError } from "../classes/errors/notFoundError";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
@@ -133,7 +134,7 @@ class SearchController implements SearchEndpoints {
         const user = req.user;
         const status = req.query.status as SearchStatus;
 
-        const searchesRes = await searchService.getSearches(
+        const searchesRes = await searchService.getSearchesBulk(
             user.userId,
             status
         );
@@ -161,6 +162,14 @@ class SearchController implements SearchEndpoints {
         );
 
         res.json(searches);
+    }
+
+    async getSearch(req: Request, res: Response) {
+        const searchId = req.params.searchId;
+        const search = await searchService.getSearch(searchId);
+        if (!search) throw new NotFoundError();
+
+        res.json(search);
     }
 
     delete(req: Request, res: Response) {}

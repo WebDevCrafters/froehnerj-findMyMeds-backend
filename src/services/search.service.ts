@@ -27,7 +27,7 @@ class SearchService {
         };
     }
 
-    async getSearches(userId: Types.ObjectId, status: SearchStatus) {
+    async getSearchesBulk(userId: Types.ObjectId, status: SearchStatus) {
         const searches = await SearchModel.find({
             patient: userId,
             status: status,
@@ -84,6 +84,12 @@ class SearchService {
         }
 
         return nearbySearches.map((doc) => this.makeSearchFromDoc(doc));
+    }
+
+    async getSearch(searchId: string | Types.ObjectId): Promise<Search | null> {
+        const search = await SearchModel.findById(searchId);
+        if (!search) return null;
+        return this.makeSearchFromDoc(search);
     }
 
     makeSearchFromDoc(
