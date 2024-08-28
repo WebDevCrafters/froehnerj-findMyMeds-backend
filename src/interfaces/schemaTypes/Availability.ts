@@ -5,6 +5,7 @@ interface Availability {
     availabilityId: Types.ObjectId;
     clinician: Types.ObjectId | SecureUser;
     search: Types.ObjectId;
+    markedOn: Date;
 }
 
 export default Availability;

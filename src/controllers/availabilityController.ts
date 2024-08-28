@@ -21,7 +21,7 @@ class AvailabilityController implements AvailablityEndpoints {
         availability.clinician = user.userId;
 
         if (!isAvailability(availability)) throw new BadRequestError();
-
+        availability.markedOn = Date.now();
         const insertedAvailability =
             await availabilityService.insertAvailability(availability);
 

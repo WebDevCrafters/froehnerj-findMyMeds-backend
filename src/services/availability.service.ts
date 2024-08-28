@@ -44,13 +44,26 @@ class AvailabilityService {
         return deleteRes;
     }
 
-    async getAvailabilityBySearchId(id: string) {
+    async getAvailabilityBySearchId(id: string | Types.ObjectId) {
         const availabilities = await AvailabilityModel.find({ search: id })
             .populate("clinician")
             .select("-password");
         if (!availabilities) throw new ServerError();
 
         return availabilities.map((doc) => this.makeDocToAvailibility(doc));
+    }
+
+    async checkIfIMarked(
+        userId: string | Types.ObjectId,
+        searchId: string | Types.ObjectId
+    ): Promise<boolean> {
+        const availabilities = await AvailabilityModel.exists({
+            clinician: userId,
+            search: searchId,
+        });
+        if (!availabilities) throw new ServerError();
+
+        return !!availabilities;
     }
 
     makeDocToAvailibility(

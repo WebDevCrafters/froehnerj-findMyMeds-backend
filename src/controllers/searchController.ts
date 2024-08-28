@@ -142,7 +142,7 @@ class SearchController implements SearchEndpoints {
         res.json(searchesRes);
     }
 
-    async getSearchInRedius(req: Request, res: Response) {
+    async getSearchInRadius(req: Request, res: Response) {
         const user = req.user;
 
         const userFromDB = await userService.getSecureUser(user.userId);
