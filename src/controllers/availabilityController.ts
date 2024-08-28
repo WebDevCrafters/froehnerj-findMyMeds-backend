@@ -22,6 +22,12 @@ class AvailabilityController implements AvailablityEndpoints {
 
         if (!isAvailability(availability)) throw new BadRequestError();
         availability.markedOn = Date.now();
+
+        const check = await availabilityService.checkIfIMarked(
+            user.userId,
+            availability.search
+        );
+        if (check) throw new BadRequestError("Already marked as available.");
         const insertedAvailability =
             await availabilityService.insertAvailability(availability);
 
