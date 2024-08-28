@@ -11,7 +11,7 @@ const MedicationSchema: Schema<Medication> = new Schema({
             ref: "Medication",
         },
     ],
-    pickUpDate: { type: Number, required: true },
+    pickUpDate: { type: Number},
 });
 
 export default mongoose.model<Medication>("Medication", MedicationSchema);
