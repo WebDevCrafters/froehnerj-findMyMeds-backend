@@ -25,4 +25,6 @@ const SearchSchema: Schema<Search> = new Schema({
     prescriberName: { type: String },
 });
 
+SearchSchema.index({ location: "2dsphere" });
+
 export default mongoose.model<Search>("Search", SearchSchema);

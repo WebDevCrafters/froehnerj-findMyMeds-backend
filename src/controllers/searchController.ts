@@ -103,7 +103,7 @@ class SearchController implements SearchEndpoints {
 
                 if (!subscriptionId)
                     throw new BadRequestError(
-                        "User does not have a subscriptoin"
+                        "Subscriptoin does not exist"
                     );
 
                 const updatePaymentReq: Payment = {
@@ -157,7 +157,7 @@ class SearchController implements SearchEndpoints {
 
         const searches = await searchService.getSearchesInRadius(
             user.userId,
-            dBLocation.coordinates,
+            dBLocation,
             30
         );
 

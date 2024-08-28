@@ -24,6 +24,5 @@ const UserSchema: Schema<User> = new Schema({
     },
 });
 
-UserSchema.index({ location: "2dsphere" });
 
 export default mongoose.model<User>("User", UserSchema);

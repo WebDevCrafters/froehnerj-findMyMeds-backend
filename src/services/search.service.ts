@@ -1,4 +1,4 @@
-import { ClientSession, Document, Types } from "mongoose";
+import mongoose, { ClientSession, Document, Types } from "mongoose";
 import Search from "../interfaces/schemaTypes/Search";
 import SearchModel from "../models/SearchModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
@@ -54,36 +54,69 @@ class SearchService {
 
     async getSearchesInRadius(
         userId: string | Types.ObjectId,
-        requestUserCoordinates: number[],
+        requestUserCoordinates: DBLocation,
         radiusMiles: number
     ) {
+        const radiusMeters = radiusMiles * 1609.34;
         const radiusRadians = radiusMiles / 3963.2;
-
-        const nearbySearches = await SearchModel.find({
-            patient: { $ne: userId },
-            status: SearchStatus.InProgress,
-            location: {
-                $geoWithin: {
-                    $centerSphere: [requestUserCoordinates, radiusRadians],
+        requestUserCoordinates.type = "Point";
+        const nearbySearchesAgg = await SearchModel.aggregate([
+            {
+                $geoNear: {
+                    near: requestUserCoordinates,
+                    distanceField: "dist.calculated",
+                    maxDistance: radiusMeters,
+                    query: {
+                        status: SearchStatus.InProgress,
+                        patient: { $ne: userId },
+                    },
+                    spherical: true,
                 },
             },
-        })
-            .select("-__v")
-            .populate({
-                path: "medication",
-                select: "-__v",
-                populate: {
-                    path: "alternatives",
-                    model: "Medication",
-                    select: "-__v",
+            {
+                $lookup: {
+                    from: "medications",
+                    foreignField: "_id",
+                    localField: "medication",
+                    as: "medication",
                 },
-            });
+            },
+            {
+                $unwind: "$medication",
+            },
+            {
+                $lookup: {
+                    from: "medications",
+                    foreignField: "_id",
+                    localField: "medication.alternatives",
+                    as: "medication.alternatives",
+                },
+            },
+            {
+                $lookup: {
+                    from: "availabilities",
+                    localField: "_id",
+                    foreignField: "search",
+                    as: "availability",
+                },
+            },
+            {
+                $match: {
+                    "availability.clinician": {
+                        $ne: new Types.ObjectId(userId),
+                    },
+                },
+            },
+            {
+                $unset: "availability",
+            },
+        ]);
 
-        if (!nearbySearches || nearbySearches.length === 0) {
+        if (!nearbySearchesAgg || nearbySearchesAgg.length === 0) {
             throw new NotFoundError("No nearby searches found");
         }
 
-        return nearbySearches.map((doc) => this.makeSearchFromDoc(doc));
+        return nearbySearchesAgg.map((doc) => this.makeSearchFromDoc(doc));
     }
 
     async getSearch(searchId: string | Types.ObjectId): Promise<Search | null> {
@@ -98,7 +131,13 @@ class SearchService {
                 _id: Types.ObjectId;
             }
     ): Search {
-        let { _id, ...searchRes } = searchDoc.toObject();
+        let searchObj = null;
+        if (searchDoc instanceof Document) {
+            searchObj = searchDoc.toObject();
+        } else {
+            searchObj = searchDoc;
+        }
+        let { _id, ...searchRes } = searchObj;
         searchRes.searchId = _id;
 
         if (searchRes.medication) {
@@ -112,10 +151,12 @@ class SearchService {
 
         if (searchRes.medication.alternatives?.length) {
             const formattedAlternatives = searchRes.medication.alternatives.map(
-                (ele) => {
-                    let { _id, ...alternative } = ele as Medication & {
+                (
+                    ele: Medication & {
                         _id: Types.ObjectId;
-                    };
+                    }
+                ) => {
+                    let { _id, ...alternative } = ele;
                     alternative.medicationId = _id;
                     return alternative;
                 }

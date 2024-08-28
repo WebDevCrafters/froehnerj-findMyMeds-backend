@@ -61,7 +61,6 @@ class AvailabilityService {
             clinician: userId,
             search: searchId,
         });
-        if (!availabilities) throw new ServerError();
 
         return !!availabilities;
     }
