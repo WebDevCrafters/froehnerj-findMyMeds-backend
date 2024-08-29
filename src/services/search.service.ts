@@ -7,6 +7,7 @@ import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import UserModel from "../models/UserModel";
 import userService from "./user.service";
 import DBLocation from "../interfaces/schemaTypes/DBLocation";
+import Availability from "../interfaces/schemaTypes/Availability";
 
 class SearchService {
     async insertSearch(
@@ -125,6 +126,44 @@ class SearchService {
         return this.makeSearchFromDoc(search);
     }
 
+    async getMarkedByMeSearches(userId: string | Types.ObjectId) {
+        const searches = await SearchModel.aggregate([
+            {
+                $lookup: {
+                    from: "medications",
+                    foreignField: "_id",
+                    localField: "medication",
+                    as: "medication",
+                },
+            },
+            {
+                $unwind: "$medication",
+            },
+            {
+                $lookup: {
+                    from: "medications",
+                    foreignField: "_id",
+                    localField: "medication.alternatives",
+                    as: "medication.alternatives",
+                },
+            },
+            {
+                $lookup: {
+                    from: "availabilities",
+                    localField: "_id",
+                    foreignField: "search",
+                    as: "availability",
+                },
+            },
+            {
+                $match: {
+                    "availability.clinician": new Types.ObjectId(userId),
+                },
+            },
+        ]);
+        return searches.map((search) => this.makeSearchFromDoc(search));
+    }
+
     makeSearchFromDoc(
         searchDoc: Document<unknown, {}, Search> &
             Search & {
@@ -137,7 +176,7 @@ class SearchService {
         } else {
             searchObj = searchDoc;
         }
-        let { _id, ...searchRes } = searchObj;
+        let { _id, __v, ...searchRes } = searchObj;
         searchRes.searchId = _id;
 
         if (searchRes.medication) {
@@ -147,6 +186,22 @@ class SearchService {
 
             medication.medicationId = _id;
             searchRes.medication = medication;
+        }
+
+        if (searchRes.availability?.length) {
+            const formattedAvailability = searchRes.availability.map(
+                (
+                    ele: Availability & {
+                        _id: Types.ObjectId;
+                        __v?: number;
+                    }
+                ) => {
+                    let { _id, __v, ...availability } = ele;
+                    availability.availabilityId = _id;
+                    return availability;
+                }
+            );
+            searchRes.availability = formattedAvailability;
         }
 
         if (searchRes.medication.alternatives?.length) {
