@@ -179,6 +179,45 @@ class SearchController implements SearchEndpoints {
         res.json(searches);
     }
 
+    async update(req: Request, res: Response) {
+        const session: ClientSession = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const search = req.body as Search;
+            const medication = search.medication;
+
+            if (!search.zipCode) throw new BadRequestError("Invalid zipCode");
+
+            if (!isMedication(medication))
+                throw new BadRequestError("Invalid medication");
+
+            if (!medication.alternatives) medication.alternatives = [];
+
+            const updatedMedication = await medicationService.updateMedication(
+                medication
+            );
+
+            const location = await userService.getCoordinates(search.zipCode);
+            search.medication = medication.medicationId;
+            search.location = convertToDBLocation(location);
+
+            const updatedSearch = await searchService.updateSearch(search);
+
+            const searchRes = {
+                ...updatedSearch,
+                medication: updatedMedication,
+                location: location,
+            };
+            await session.commitTransaction();
+            res.json(searchRes);
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
+    }
+
     delete(req: Request, res: Response) {}
 
     getNearBy(req: Request, res: Response) {}
@@ -186,8 +225,6 @@ class SearchController implements SearchEndpoints {
     markAsAvailable(req: Request, res: Response) {}
 
     markAsComplete(req: Request, res: Response) {}
-
-    update(req: Request, res: Response) {}
 }
 
 export const searchController = new SearchController();

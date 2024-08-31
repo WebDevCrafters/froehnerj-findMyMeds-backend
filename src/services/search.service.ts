@@ -6,8 +6,12 @@ import Medication from "../interfaces/schemaTypes/Medication";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import UserModel from "../models/UserModel";
 import userService from "./user.service";
-import DBLocation, { convertToLocation } from "../interfaces/schemaTypes/DBLocation";
+import DBLocation, {
+    convertToLocation,
+} from "../interfaces/schemaTypes/DBLocation";
 import Availability from "../interfaces/schemaTypes/Availability";
+import medicationService from "./medication.service";
+import { convertToDBLocation } from "../interfaces/responses/Location";
 
 class SearchService {
     async insertSearch(
@@ -31,7 +35,7 @@ class SearchService {
     async getSearchesBulk(userId: Types.ObjectId, statuses: SearchStatus[]) {
         const searches = await SearchModel.find({
             patient: userId,
-            status: {$in:statuses},
+            status: { $in: statuses },
         })
             .select("-__v")
             .populate({
@@ -164,6 +168,28 @@ class SearchService {
         return searches.map((search) => this.makeSearchFromDoc(search));
     }
 
+    async updateSearch(
+        search: Search,
+        isStatusUpdateAllowed: boolean = false
+    ): Promise<Search | null> {
+        let searchToUpdate = search;
+
+        if (!isStatusUpdateAllowed) {
+            let { status, ...rest } = search;
+            searchToUpdate = rest;
+        }
+
+        const updatedSearch = await SearchModel.findByIdAndUpdate(
+            search.searchId,
+            searchToUpdate,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedSearch) return null;
+
+        return this.makeSearchFromDoc(updatedSearch);
+    }
+
     makeSearchFromDoc(
         searchDoc: Document<unknown, {}, Search> &
             Search & {
@@ -178,15 +204,6 @@ class SearchService {
         }
         let { _id, __v, location, ...searchRes } = searchObj;
         searchRes.searchId = _id;
-
-        if (searchRes.medication) {
-            let { _id, ...medication } = searchRes.medication as Medication & {
-                _id: Types.ObjectId;
-            };
-
-            medication.medicationId = _id;
-            searchRes.medication = medication;
-        }
 
         if (searchRes.availability?.length) {
             const formattedAvailability = searchRes.availability.map(
@@ -204,23 +221,17 @@ class SearchService {
             searchRes.availability = formattedAvailability;
         }
 
-        if (searchRes.medication.alternatives?.length) {
-            const formattedAlternatives = searchRes.medication.alternatives.map(
-                (
-                    ele: Medication & {
-                        _id: Types.ObjectId;
-                    }
-                ) => {
-                    let { _id, ...alternative } = ele;
-                    alternative.medicationId = _id;
-                    return alternative;
-                }
+        if (
+            searchRes.medication &&
+            !(searchRes.medication instanceof Types.ObjectId)
+        ) {
+            searchRes.medication = medicationService.mapToMedication(
+                searchRes.medication
             );
-            searchRes.medication.alternatives = formattedAlternatives;
         }
 
-        if(searchRes.location)
-        searchRes.location = convertToLocation(location);
+        if (searchRes.location)
+            searchRes.location = convertToLocation(location);
         /**
                 @todo: Send status also 
             */

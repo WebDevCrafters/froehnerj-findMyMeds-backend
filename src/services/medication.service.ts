@@ -3,6 +3,7 @@ import { BadRequestError } from "../classes/errors/badRequestError";
 import Medication from "../interfaces/schemaTypes/Medication";
 import MedicationModel from "../models/MedicationModel";
 import isMedication from "../utils/guards/isMedication";
+import { Document } from "mongoose";
 
 class MedicationService {
     async insertMedication(
@@ -53,6 +54,49 @@ class MedicationService {
                 ...rest,
             };
         });
+    }
+
+    async updateMedication(medication: Medication) {
+        const updatedMedication = await MedicationModel.findByIdAndUpdate(
+            medication.medicationId,
+            medication,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedMedication) return null;
+
+        return this.mapToMedication(updatedMedication);
+    }
+
+    mapToMedication(
+        medication: Document<unknown, {}, Medication> &
+            Medication & {
+                _id: Types.ObjectId;
+            }
+    ): Medication {
+        let alternatives: Medication[] = medication.alternatives.map(
+            (ele: Medication | Types.ObjectId) => {
+                return {
+                    medicationId: medication._id,
+                    brandName: medication.brandName,
+                    dose: medication.dose,
+                    name: medication.name,
+                    pickUpDate: medication.pickUpDate,
+                    quantity: medication.quantity,
+                    alternatives: [],
+                };
+            }
+        );
+
+        return {
+            medicationId: medication._id,
+            brandName: medication.brandName,
+            dose: medication.dose,
+            name: medication.name,
+            pickUpDate: medication.pickUpDate,
+            quantity: medication.quantity,
+            alternatives: alternatives,
+        };
     }
 }
 

@@ -9,7 +9,7 @@ interface Search {
     searchId?: Types.ObjectId;
     patient: Types.ObjectId | User;
     medication: Types.ObjectId | Medication;
-    status: SearchStatus;
+    status?: SearchStatus;
     zipCode: number;
     location: DBLocation | Location;
     prescriberName: string;
