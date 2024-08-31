@@ -131,7 +131,7 @@ class SearchController implements SearchEndpoints {
 
     async getMySearches(req: Request, res: Response) {
         const user = req.user;
-        const status = req.query.status as SearchStatus;
+        const status = req.query.status as SearchStatus[];
 
         const searchesRes = await searchService.getSearchesBulk(
             user.userId,

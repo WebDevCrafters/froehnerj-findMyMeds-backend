@@ -28,10 +28,10 @@ class SearchService {
         };
     }
 
-    async getSearchesBulk(userId: Types.ObjectId, status: SearchStatus) {
+    async getSearchesBulk(userId: Types.ObjectId, statuses: SearchStatus[]) {
         const searches = await SearchModel.find({
             patient: userId,
-            status: status,
+            status: {$in:statuses},
         })
             .select("-__v")
             .populate({
@@ -219,6 +219,7 @@ class SearchService {
             searchRes.medication.alternatives = formattedAlternatives;
         }
 
+        if(searchRes.location)
         searchRes.location = convertToLocation(location);
         /**
                 @todo: Send status also 
