@@ -37,7 +37,7 @@ class SearchController implements SearchEndpoints {
 
             if (!medication.alternatives) medication.alternatives = [];
 
-            const prevPayment = await paymentService.getPaymentByUserId(
+            const prevPayment = await paymentService.getActivePaymentByUserId(
                 user.userId
             );
 

@@ -39,16 +39,36 @@ class PyamentService {
         return allPayments.map((doc) => this.makeDocToPayment(doc));
     }
 
-    async getPaymentByUserId(userId: Types.ObjectId): Promise<Payment | null> {
-        /**
-            @todo: Get only payments which searchCOnsumed is less than subscription searchCount
-         */
+    async getActivePaymentByUserId(userId: Types.ObjectId): Promise<Payment | null> {
 
-        const payment = await PaymentModel.findOne({
-            userId,
-        }).populate("subscription");
+        const payments = await PaymentModel.aggregate([
+            {
+                $match: {
+                    userId: new Types.ObjectId(userId),
+                },
+            },
+            {
+                $lookup: {
+                    from: "subscriptions",
+                    localField: "subscription",
+                    foreignField: "_id",
+                    as: "subscription",
+                },
+            },
+            {
+                $unwind: "$subscription",
+            },
+            {
+                $match: {
+                    $expr: {
+                        $lt: ["$searchesConsumed", "$subscription.searchCount"],
+                    },
+                },
+            },
+        ]);
 
-        if (!payment) return null;
+        if (payments.length === 0) return null;
+        const payment = payments[0];
 
         return this.makeDocToPayment(payment);
     }

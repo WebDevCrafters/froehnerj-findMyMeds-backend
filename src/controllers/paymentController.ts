@@ -9,6 +9,7 @@ import { NotFoundError } from "../classes/errors/notFoundError";
 import { ForbiddenError } from "../classes/errors/forbiddenError";
 import Subscription from "../interfaces/schemaTypes/Subscription";
 import subscriptionService from "../services/subscription.service";
+import { PaymentRequiredError } from "../classes/errors/paymentRequiredError";
 
 class PaymentController implements PaymentsEndpoints {
     async addPayment(req: Request, res: Response): Promise<void> {
@@ -67,13 +68,13 @@ class PaymentController implements PaymentsEndpoints {
         res.json(payments);
     }
 
-    async getPayments(req: Request, res: Response) {
+    async getActivePayment(req: Request, res: Response) {
         const user = req.user;
 
         if (!isValidObjectId(user.userId))
             throw new ForbiddenError("Invalid access token user");
 
-        const payment = await paymentService.getPaymentByUserId(user.userId);
+        const payment = await paymentService.getActivePaymentByUserId(user.userId);
 
         if (!payment) throw new NotFoundError();
 

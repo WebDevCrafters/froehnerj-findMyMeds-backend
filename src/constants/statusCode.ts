@@ -1,6 +1,7 @@
 export enum StatusCode {
     BAD_REQUEST_ERROR = 400,
     UNAUTHORIZED = 401,
+    PAYMENT_REQUIRED = 402,
     FORBIDDEN = 403,
     NOT_FOUND = 404,
     CONFLICT_ERROR = 409,
