@@ -14,5 +14,8 @@ availabilityRouter
 availabilityRouter
     .route("/:searchId")
     .get(asyncHandler(availabilityController.getAvailabilityBySearchId));
+availabilityRouter
+    .route("/check/:searchId")
+    .get(asyncHandler(availabilityController.checkIfIMarked));
 
 export default availabilityRouter;

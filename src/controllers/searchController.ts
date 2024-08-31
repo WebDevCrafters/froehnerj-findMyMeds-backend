@@ -103,9 +103,7 @@ class SearchController implements SearchEndpoints {
                 }
 
                 if (!subscriptionId)
-                    throw new BadRequestError(
-                        "Subscriptoin does not exist"
-                    );
+                    throw new BadRequestError("Subscriptoin does not exist");
 
                 const updatePaymentReq: Payment = {
                     ...prevPayment,
@@ -171,6 +169,14 @@ class SearchController implements SearchEndpoints {
         if (!search) throw new NotFoundError();
 
         res.json(search);
+    }
+
+    async getMarkedByMeSearches(req: Request, res: Response) {
+        const userId = req.user.userId;
+        const searches = await searchService.getMarkedByMeSearches(userId);
+        if (!searches || !searches.length) throw new NotFoundError();
+
+        res.json(searches);
     }
 
     delete(req: Request, res: Response) {}

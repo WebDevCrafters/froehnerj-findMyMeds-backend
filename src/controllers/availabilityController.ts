@@ -57,6 +57,16 @@ class AvailabilityController implements AvailablityEndpoints {
 
         res.json(avalabilities);
     }
+
+    async checkIfIMarked(req: Request, res: Response) {
+        const userId = req.user.userId;
+        const { searchId } = req.params;
+        const markedByMe = await availabilityService.checkIfIMarked(
+            userId,
+            searchId
+        );
+        res.json({ markedByMe: markedByMe });
+    }
 }
 
 export default new AvailabilityController();

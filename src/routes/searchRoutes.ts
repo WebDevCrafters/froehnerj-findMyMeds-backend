@@ -8,5 +8,6 @@ searchRouter.use(validateTokenHandler);
 searchRouter.route("/add").post(asyncHandler(searchController.add));
 searchRouter.route("/").get(asyncHandler(searchController.getMySearches));
 searchRouter.route("/radius").get(asyncHandler(searchController.getSearchInRadius));
+searchRouter.route("/marked").get(asyncHandler(searchController.getMarkedByMeSearches));
 
 export default searchRouter;
