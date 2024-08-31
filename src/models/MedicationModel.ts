@@ -11,7 +11,8 @@ const MedicationSchema: Schema<Medication> = new Schema({
             ref: "Medication",
         },
     ],
-    pickUpDate: { type: Number},
+    pickUpDate: { type: Number },
+    brandName: { type: String }
 });
 
 export default mongoose.model<Medication>("Medication", MedicationSchema);
