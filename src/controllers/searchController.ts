@@ -81,6 +81,7 @@ class SearchController implements SearchEndpoints {
                 location: location,
                 prescriberName: search.prescriberName,
                 zipCode: search.zipCode,
+                dob: search.dob,
             };
 
             if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)

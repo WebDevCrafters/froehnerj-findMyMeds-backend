@@ -7,6 +7,7 @@ interface Medication {
     quantity: number;
     alternatives: (Types.ObjectId | Medication)[];
     pickUpDate: number;
+    brandName: string
 }
 
 export default Medication;

@@ -13,6 +13,7 @@ interface Search {
     zipCode: number;
     location: DBLocation | Location;
     prescriberName: string;
+    dob: number;
 }
 
 export default Search;
