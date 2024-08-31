@@ -68,11 +68,13 @@ class PharmacyService {
     async getPharmacyFaxesInRadius(
         userCoordinates: number[],
         radiusMiles: number,
-        select: string[] = []
+        select: string[] = [],
+        page?: number,
+        limit?: number
     ) {
         const radiusRadians = radiusMiles / 3963.2;
 
-        const nearByPharmacies = await PharmacyModel.find({
+        const query = PharmacyModel.find({
             location: {
                 $geoWithin: {
                     $centerSphere: [userCoordinates, radiusRadians],
@@ -80,6 +82,13 @@ class PharmacyService {
             },
             $and: [{ faxNumber: { $ne: null } }, { faxNumber: { $ne: "--" } }],
         }).select(select);
+
+        if (page !== undefined && limit !== undefined) {
+            const skip = (page - 1) * limit;
+            query.skip(skip).limit(limit);
+        }
+
+        const nearByPharmacies = await query;
 
         if (!nearByPharmacies || nearByPharmacies.length === 0)
             throw new NotFoundError("No pharmacies found");
@@ -127,9 +136,7 @@ class PharmacyService {
         return response.data;
     }
 
-    async sendBulkFaxes(
-        faxDetails: SendFaxRequest[]
-    ) {
+    async sendBulkFaxes(faxDetails: SendFaxRequest[]) {
         const accessToken = process.env.IFAX_ACCESS_TOKEN;
         const url = `${this.IFAX_BASE_URL}/fax-send`;
 

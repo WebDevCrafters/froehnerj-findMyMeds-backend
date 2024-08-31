@@ -16,12 +16,18 @@ import Search from "../interfaces/schemaTypes/Search";
 class PharmacyController {
     async getPharmacyFaxesInRadius(req: Request, res: Response) {
         const user = req.user;
+        const { page, limit } = req.query;
+        if (page === "0") throw new BadRequestError("Page starts from 1");
+
         const userFromDB: User | null = await userService.getUser(user.email);
         if (!userFromDB) throw new BadRequestError("Invalid api key");
 
         const pharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             userFromDB.location.coordinates,
-            30
+            30,
+            [],
+            Number(page),
+            Number(limit)
         );
 
         if (!pharmacies || pharmacies.length === 0) throw new NotFoundError();
@@ -32,7 +38,7 @@ class PharmacyController {
     async sendInvitation(req: Request, res: Response) {
         const user = req.user;
 
-        let search  = req.body;
+        let search = req.body;
         search = search as Search;
 
         if (!isLocation(search.location))
