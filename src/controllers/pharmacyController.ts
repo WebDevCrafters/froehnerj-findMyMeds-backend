@@ -4,10 +4,14 @@ import { NotFoundError } from "../classes/errors/notFoundError";
 import { BadRequestError } from "../classes/errors/badRequestError";
 import userService from "../services/user.service";
 import User from "../interfaces/schemaTypes/User";
-import Location, { convertToDBLocation } from "../interfaces/responses/Location";
+import Location, {
+    convertToDBLocation,
+} from "../interfaces/responses/Location";
 import isLocation from "../utils/guards/isLocation";
 import { generateFaxMessage } from "../constants/faxMessage";
 import isMedication from "../utils/guards/isMedication";
+import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
+import Search from "../interfaces/schemaTypes/Search";
 
 class PharmacyController {
     async getPharmacyFaxesInRadius(req: Request, res: Response) {
@@ -28,25 +32,32 @@ class PharmacyController {
     async sendInvitation(req: Request, res: Response) {
         const user = req.user;
 
-        const {location, search} = req.body;
+        let search  = req.body;
+        search = search as Search;
 
-        if(!isLocation(location) || isMedication(search)) throw new BadRequestError("Invalid location or search");
+        if (!isLocation(search.location))
+            throw new BadRequestError("Invalid location");
 
+        const dbLocation = convertToDBLocation(search.location);
 
-        const dbLocation = convertToDBLocation(location);
-        
         const nearByPharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             dbLocation.coordinates,
             30,
             ["name", "faxNumber"]
         );
-        // for (let pharmacy of nearByPharmacies) {
+        let sendFaxBulkReq: SendFaxRequest[] = [];
+
+        for (let i = 0; i < 3; i++) {
             const toFaxNumber = "+19292070142";
-            // const toName = pharmacy.name + "  this is  " + pharmacy.faxNumber;
-            const faxMessage = generateFaxMessage(nearByPharmacies[0], search);
-            await pharmacyService.sendFax(toFaxNumber, "Eissat the latest", faxMessage);
-        // }
-        res.json(nearByPharmacies.length);
+            const toName =
+                nearByPharmacies[i].name +
+                "  this is  " +
+                nearByPharmacies[i].faxNumber;
+            const faxMessage = generateFaxMessage(nearByPharmacies[i], search);
+            sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
+        }
+        const allResponse = await pharmacyService.sendBulkFaxes(sendFaxBulkReq);
+        res.json(allResponse);
     }
 
     async checkStatus(req: Request, res: Response) {

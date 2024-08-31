@@ -13,6 +13,7 @@ import dotenv from "dotenv";
 import Search from "../interfaces/schemaTypes/Search";
 import { QRBase64 } from "../constants/QRBase64";
 import { generateFaxMessage } from "../constants/faxMessage";
+import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
 dotenv.config();
 
 class PharmacyService {
@@ -126,33 +127,39 @@ class PharmacyService {
         return response.data;
     }
 
-    async sendFax(toFaxNumber: string, toName: string, faxMessage: string) {
+    async sendBulkFaxes(
+        faxDetails: SendFaxRequest[]
+    ) {
         const accessToken = process.env.IFAX_ACCESS_TOKEN;
         const url = `${this.IFAX_BASE_URL}/fax-send`;
 
-        const response = await axios.post(
-            url,
-            {
-                faxNumber: toFaxNumber,
-                subject: "Join FindMyMeds as a Provider",
-                from_name: "FindMyMeds",
-                to_name: toName,
-                message: faxMessage,
-                faxData: [
-                    {
-                        fileName: "FindMyMeds.png",
-                        fileData: QRBase64,
-                    },
-                ],
-            },
-            {
-                headers: {
-                    accessToken: accessToken,
+        const faxRequests = faxDetails.map((detail) =>
+            axios.post(
+                url,
+                {
+                    faxNumber: detail.toFaxNumber,
+                    subject: "Join FindMyMeds as a Provider",
+                    from_name: "FindMyMeds",
+                    to_name: detail.toName,
+                    message: detail.faxMessage,
+                    faxData: [
+                        {
+                            fileName: "FindMyMeds.png",
+                            fileData: QRBase64,
+                        },
+                    ],
                 },
-            }
+                {
+                    headers: {
+                        accessToken: accessToken,
+                    },
+                }
+            )
         );
 
-        return response.data;
+        const results = await Promise.allSettled(faxRequests);
+
+        return results;
     }
 }
 

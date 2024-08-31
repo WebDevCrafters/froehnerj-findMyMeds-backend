@@ -6,7 +6,7 @@ import Medication from "../interfaces/schemaTypes/Medication";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import UserModel from "../models/UserModel";
 import userService from "./user.service";
-import DBLocation from "../interfaces/schemaTypes/DBLocation";
+import DBLocation, { convertToLocation } from "../interfaces/schemaTypes/DBLocation";
 import Availability from "../interfaces/schemaTypes/Availability";
 
 class SearchService {
@@ -176,7 +176,7 @@ class SearchService {
         } else {
             searchObj = searchDoc;
         }
-        let { _id, __v, ...searchRes } = searchObj;
+        let { _id, __v, location, ...searchRes } = searchObj;
         searchRes.searchId = _id;
 
         if (searchRes.medication) {
@@ -219,6 +219,7 @@ class SearchService {
             searchRes.medication.alternatives = formattedAlternatives;
         }
 
+        searchRes.location = convertToLocation(location);
         /**
                 @todo: Send status also 
             */
