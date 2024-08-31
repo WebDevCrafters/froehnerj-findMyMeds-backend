@@ -11,7 +11,7 @@ interface Pharmacy {
     url: string;
     authorizedOfficialName: string;
     authorizedOfficialContactNumber: string;
-    location: DBLocation | Location;
+    location?: DBLocation | Location;
 }
 
 export default Pharmacy;

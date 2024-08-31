@@ -15,4 +15,6 @@ const PharmacySchema: Schema<Pharmacy> = new Schema({
     },
 });
 
+PharmacySchema.index({ location: "2dsphere" });
+
 export default mongoose.model<Pharmacy>("Pharmacy", PharmacySchema);

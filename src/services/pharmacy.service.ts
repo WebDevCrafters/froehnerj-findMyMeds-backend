@@ -8,8 +8,16 @@ import { NotFoundError } from "../classes/errors/notFoundError";
 import DBLocation, {
     convertToLocation,
 } from "../interfaces/schemaTypes/DBLocation";
+import axios from "axios";
+import dotenv from "dotenv";
+import Search from "../interfaces/schemaTypes/Search";
+import { QRBase64 } from "../constants/QRBase64";
+import { generateFaxMessage } from "../constants/faxMessage";
+dotenv.config();
 
 class PharmacyService {
+    IFAX_BASE_URL = "https://api.ifaxapp.com/v1/customer";
+
     readDataFromExcel(filePath: string) {
         const workbook = XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
@@ -56,11 +64,12 @@ class PharmacyService {
         }
     }
 
-    async getPharmacyFaxesInRadius(email: string, radiusMiles: number) {
-        const user = await userService.getUser(email);
-        if (!user) throw new BadRequestError("Invalid api key");
+    async getPharmacyFaxesInRadius(
+        userCoordinates: number[],
+        radiusMiles: number,
+        select: string[] = []
+    ) {
         const radiusRadians = radiusMiles / 3963.2;
-        const userCoordinates = user.location.coordinates;
 
         const nearByPharmacies = await PharmacyModel.find({
             location: {
@@ -68,7 +77,8 @@ class PharmacyService {
                     $centerSphere: [userCoordinates, radiusRadians],
                 },
             },
-        });
+            $and: [{ faxNumber: { $ne: null } }, { faxNumber: { $ne: "--" } }],
+        }).select(select);
 
         if (!nearByPharmacies || nearByPharmacies.length === 0)
             throw new NotFoundError("No pharmacies found");
@@ -89,13 +99,60 @@ class PharmacyService {
             pharmacyId,
             ...rest
         } = doc.toObject() as Pharmacy & { __v?: number; _id: Types.ObjectId };
-
-        const location = convertToLocation(dbLocation as DBLocation);
+        let location;
+        if (dbLocation) location = convertToLocation(dbLocation as DBLocation);
         return {
             pharmacyId: _id,
             location: location,
             ...rest,
         };
+    }
+
+    async checkFaxStatus(faxId: string) {
+        const accessToken = process.env.IFAX_ACCESS_TOKEN;
+        const url = `${this.IFAX_BASE_URL}/fax-status`;
+        const response = await axios.post(
+            url,
+            {
+                jobId: faxId,
+            },
+            {
+                headers: {
+                    accessToken: accessToken,
+                },
+            }
+        );
+
+        return response.data;
+    }
+
+    async sendFax(toFaxNumber: string, toName: string, faxMessage: string) {
+        const accessToken = process.env.IFAX_ACCESS_TOKEN;
+        const url = `${this.IFAX_BASE_URL}/fax-send`;
+
+        const response = await axios.post(
+            url,
+            {
+                faxNumber: toFaxNumber,
+                subject: "Join FindMyMeds as a Provider",
+                from_name: "FindMyMeds",
+                to_name: toName,
+                message: faxMessage,
+                faxData: [
+                    {
+                        fileName: "FindMyMeds.png",
+                        fileData: QRBase64,
+                    },
+                ],
+            },
+            {
+                headers: {
+                    accessToken: accessToken,
+                },
+            }
+        );
+
+        return response.data;
     }
 }
 
