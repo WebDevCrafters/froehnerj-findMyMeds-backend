@@ -7,13 +7,13 @@ import Location from "../responses/Location";
 
 interface Search {
     searchId?: Types.ObjectId;
-    patient: Types.ObjectId | User;
-    medication: Types.ObjectId | Medication;
+    patient?: Types.ObjectId | User;
+    medication?: Types.ObjectId | Medication;
     status?: SearchStatus;
-    zipCode: number;
-    location: DBLocation | Location;
-    prescriberName: string;
-    dob: number;
+    zipCode?: number;
+    location?: DBLocation | Location;
+    prescriberName?: string;
+    dob?: number;
 }
 
 export default Search;

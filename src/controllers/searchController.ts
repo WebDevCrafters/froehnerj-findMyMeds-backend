@@ -224,7 +224,24 @@ class SearchController implements SearchEndpoints {
 
     markAsAvailable(req: Request, res: Response) {}
 
-    markAsComplete(req: Request, res: Response) {}
+    async markStatus(req: Request, res: Response) {
+        const { searchId, status } = req.body;
+
+        if (
+            !searchId ||
+            !Object.values(SearchStatus).includes(status as SearchStatus)
+        ) {
+            throw new BadRequestError();
+        }
+
+        const search: Search = {
+            searchId: new Types.ObjectId(searchId),
+            status: status as SearchStatus,
+        };
+        const updatedSearch = await searchService.updateSearch(search, true);
+
+        res.json(updatedSearch);
+    }
 }
 
 export const searchController = new SearchController();
