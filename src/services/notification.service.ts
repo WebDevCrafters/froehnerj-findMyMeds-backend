@@ -1,6 +1,7 @@
 import NotificationModel from "../models/NotificationModel";
 import { Notification } from "../interfaces/schemaTypes/Notification";
 import { Document, Types } from "mongoose";
+import SocketService from "./socket.service";
 
 class NotificationService {
     async insertAndSend(notification: Notification) {
@@ -21,6 +22,7 @@ class NotificationService {
     }
 
     async send(notification: Notification) {
+        SocketService.getInstance().sendNotificationToUser(notification);
     }
 
     async getNotifications(userId: string | Types.ObjectId, page: number, limit: number) {

@@ -10,12 +10,15 @@ import availabilityRouter from "./routes/availabilityRoutes";
 import pharmacyRouter from "./routes/pharmacyRoutes";
 import cors from "cors";
 import notificationRouter from "./routes/notificationRoutes";
+import { createServer } from "http";
+import { Socket, Server } from "socket.io";
+import SocketService from "./services/socket.service";
 
 dotenv.config();
 const app = express();
 connectToDB();
-
 const corsOrigin = process.env.CORS_ORIGIN;
+
 app.use(
     cors({
         origin: corsOrigin,

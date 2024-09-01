@@ -1,7 +1,12 @@
-import app from './app'
+import { createServer } from "http";
+import app from "./app";
+import { Server, Socket } from "socket.io";
+import SocketService from "./services/socket.service";
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT;
 
-app.listen(port, ()=>{
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-})
+const server = app.listen(port || 5000, () => {
+    console.log(`[server]: Server is running at http://localhost:${{ port }}`);
+});
+
+SocketService.getInstance().initialize(server);

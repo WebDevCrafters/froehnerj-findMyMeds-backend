@@ -48,7 +48,7 @@ class AvailabilityService {
         const availabilities = await AvailabilityModel.find({ search: id })
             .populate("clinician")
             .select("-password");
-        if (!availabilities) throw new ServerError();
+        if (!availabilities) throw new NotFoundError();
 
         return availabilities.map((doc) => this.makeDocToAvailibility(doc));
     }
