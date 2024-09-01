@@ -1,10 +1,10 @@
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 
 export interface Notification {
-    notificationId?: ObjectId;
+    notificationId?: Types.ObjectId;
     notificationType: NotificationType;
     createdOn: number;
-    userId: ObjectId;
+    userId?: Types.ObjectId;
     isRead: boolean;
     data?: any;
 }

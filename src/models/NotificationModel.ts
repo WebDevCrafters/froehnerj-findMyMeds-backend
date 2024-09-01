@@ -15,6 +15,7 @@ const NotificationSchema: Schema<Notification> = new Schema({
     createdOn: {
         type: Number,
         required: true,
+        default: Date.now()
     },
     isRead: { type: Boolean, required: true },
 });

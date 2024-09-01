@@ -1,14 +1,53 @@
+import NotificationModel from "../models/NotificationModel";
+import { Notification } from "../interfaces/schemaTypes/Notification";
+import { Document, Types } from "mongoose";
+
 class NotificationService {
-    insert(notification:Notification) {
-
-    }
-    
-    update(notification: Notification){
-
+    async insert(notification: Notification) {
+        const newNotification = await NotificationModel.create(notification);
+        return newNotification;
     }
 
-    send(notification: Notification){
+    async update(notification: Notification) {
+        const updatedNotification = await NotificationModel.findByIdAndUpdate(
+            notification.notificationId,
+            notification,
+            { new: true, runValidators: true }
+        );
+        if (!updatedNotification) return null;
 
+        return updatedNotification;
+    }
+
+    async send(notification: Notification) {
+        const savedNotification = await this.insert(notification);
+        return savedNotification;
+    }
+
+    async getNotifications(userId: string, page: number, limit: number) {
+        const skip = (page - 1) * limit;
+        const notifications = await NotificationModel.find({
+            userId: new Types.ObjectId(userId),
+        })
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit);
+        return notifications.map((doc) => this.mapToMotification(doc));
+    }
+
+    mapToMotification(
+        notificationDoc: Document<unknown, {}, Notification> &
+            Notification & {
+                _id: Types.ObjectId;
+            }
+    ): Notification {
+        return {
+            notificationId: notificationDoc._id,
+            createdOn: notificationDoc.createdOn,
+            isRead: notificationDoc.isRead,
+            notificationType: notificationDoc.notificationType,
+            userId: notificationDoc.userId,
+        };
     }
 }
 
