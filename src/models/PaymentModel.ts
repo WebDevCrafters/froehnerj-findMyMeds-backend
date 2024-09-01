@@ -13,7 +13,6 @@ const PaymentSchema: Schema<Payment> = new Schema({
         type: String,
         enum: Object.values(PaymentStatus),
         required: true,
-        paidOn: { type: Number },
     },
     searchesConsumed: { type: Number, default: 0, required: true },
     paidOn: { type: Number },

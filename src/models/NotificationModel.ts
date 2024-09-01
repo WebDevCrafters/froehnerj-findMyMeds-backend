@@ -1,43 +1,27 @@
 import { Schema, model, Types } from "mongoose";
+import { Notification } from "../interfaces/schemaTypes/Notification";
 
-const NotificationSchema = new Schema(
-    {
-        patientId: {
-            type: Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        clinicianId: {
-            type: Types.ObjectId,
-            ref: "Clinician",
-            required: true,
-        },
-        medicationId: {
-            type: Types.ObjectId,
-            ref: "Medication",
-            required: true,
-        },
-        type: {
-            type: String,
-            enum: Object.values(NotificationType),
-            required: true,
-        },
-        message: {
-            type: String,
-            required: true,
-        },
-        read: {
-            type: Boolean,
-            default: false,
-        },
-        timestamp: {
-            type: Date,
-            default: Date.now,
-        },
+const NotificationSchema: Schema<Notification> = new Schema({
+    userId: {
+        type: Types.ObjectId,
+        ref: "User",
+        required: true,
     },
-    { timestamps: true }
-);
+    notificationType: {
+        type: String,
+        enum: Object.values(NotificationType),
+        required: true,
+    },
+    createdOn: {
+        type: Number,
+        required: true,
+    },
+    isRead: { type: Boolean, required: true },
+});
 
-const NotificationModel = model("Notification", NotificationSchema);
+const NotificationModel = model<Notification>(
+    "Notification",
+    NotificationSchema
+);
 
 export default NotificationModel;
