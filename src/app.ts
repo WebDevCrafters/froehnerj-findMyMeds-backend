@@ -9,6 +9,7 @@ import paymentRouter from "./routes/paymentRoutes";
 import availabilityRouter from "./routes/availabilityRoutes";
 import pharmacyRouter from "./routes/pharmacyRoutes";
 import cors from "cors";
+import notificationRouter from "./routes/notificationRoutes";
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/subscription", subscriptionRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/availability", availabilityRouter);
 app.use("/api/pharmacies", pharmacyRouter);
+app.use("/api/notification", notificationRouter);
 app.use(errorHandler);
 
 export default app;

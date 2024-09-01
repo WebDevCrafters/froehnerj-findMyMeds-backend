@@ -16,9 +16,10 @@ const NotificationSchema: Schema<Notification> = new Schema({
     createdOn: {
         type: Number,
         required: true,
-        default: Date.now()
+        default: Date.now(),
     },
     isRead: { type: Boolean, required: true },
+    data: { type: Object },
 });
 
 const NotificationModel = model<Notification>(

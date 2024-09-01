@@ -23,7 +23,7 @@ class NotificationService {
     async send(notification: Notification) {
     }
 
-    async getNotifications(userId: string, page: number, limit: number) {
+    async getNotifications(userId: string | Types.ObjectId, page: number, limit: number) {
         const skip = (page - 1) * limit;
         const notifications = await NotificationModel.find({
             userId: new Types.ObjectId(userId),
@@ -46,6 +46,7 @@ class NotificationService {
             isRead: notificationDoc.isRead,
             notificationType: notificationDoc.notificationType,
             userId: notificationDoc.userId,
+            data: notificationDoc.data
         };
     }
 }

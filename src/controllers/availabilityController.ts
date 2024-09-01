@@ -44,6 +44,7 @@ class AvailabilityController implements AvailablityEndpoints {
                 isRead: false,
                 notificationType: NotificationType.MarkAsAvailable,
                 userId: search.patient._id,
+                data: { medicationId: search.searchId },
             };
             notificationService.insertAndSend(notification);
         }
