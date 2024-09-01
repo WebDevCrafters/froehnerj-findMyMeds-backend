@@ -50,7 +50,7 @@ class UserService {
         return userFromDB;
     }
 
-    makeDocToAvailibility(
+    makeDocToUser(
         doc: Document<unknown, {}, SecureUser> &
             SecureUser & {
                 _id: Types.ObjectId;

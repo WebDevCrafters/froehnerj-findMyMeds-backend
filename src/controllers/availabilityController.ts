@@ -10,6 +10,7 @@ import searchService from "../services/search.service";
 import notificationService from "../services/notification.service";
 import { Notification } from "../interfaces/schemaTypes/Notification";
 import { NotificationType } from "../interfaces/schemaTypes/enums/NotificationType";
+import userService from "../services/user.service";
 
 class AvailabilityController implements AvailablityEndpoints {
     async add(req: Request, res: Response) {
@@ -38,13 +39,21 @@ class AvailabilityController implements AvailablityEndpoints {
         if (!insertedAvailability) throw new ServerError();
 
         const search = await searchService.getSearch(availability.search);
-        if (search?.patient) {
+
+        let clinician = null;
+        if (insertedAvailability.clinician instanceof Types.ObjectId) {
+            clinician = await userService.getSecureUser(
+                insertedAvailability.clinician
+            );
+        }
+        if (search?.patient && clinician) {
+            insertedAvailability.clinician = clinician;
             const notification: Notification = {
                 createdOn: Date.now(),
                 isRead: false,
                 notificationType: NotificationType.MarkAsAvailable,
                 userId: search.patient._id,
-                data: { medicationId: search.searchId },
+                data: insertedAvailability,
             };
             notificationService.insertAndSend(notification);
         }
@@ -68,7 +77,7 @@ class AvailabilityController implements AvailablityEndpoints {
         if (!searchId) throw new BadRequestError();
 
         const avalabilities =
-            await availabilityService.getAvailabilityBySearchId(searchId);
+            await availabilityService.getAvailabilityBySearchIdBulk(searchId);
 
         res.json(avalabilities);
     }

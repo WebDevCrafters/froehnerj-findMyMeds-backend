@@ -44,7 +44,16 @@ class AvailabilityService {
         return deleteRes;
     }
 
-    async getAvailabilityBySearchId(id: string | Types.ObjectId) {
+    async getAvailability(id: string | Types.ObjectId) {
+        const availability = await AvailabilityModel.findById(id)
+            .populate("clinician")
+            .select("-password");
+        if (!availability) throw new NotFoundError();
+
+        return this.makeDocToAvailibility(availability);
+    }
+
+    async getAvailabilityBySearchIdBulk(id: string | Types.ObjectId) {
         const availabilities = await AvailabilityModel.find({ search: id })
             .populate("clinician")
             .select("-password");
@@ -77,7 +86,7 @@ class AvailabilityService {
                 __v: number;
             };
         let user = clinician;
-        if (!isValidObjectId(clinician)) {
+        if (clinician && !isValidObjectId(clinician)) {
             const { _id, __v, userId, password, ...rest } =
                 clinician as SecureUser & {
                     _id: Types.ObjectId;
