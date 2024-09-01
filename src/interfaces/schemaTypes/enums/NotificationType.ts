@@ -1,4 +1,4 @@
-enum NotificationType {
+export enum NotificationType {
     MarkAsAvailable = "AVAILABLE",
     MarkAsUnavailable = "UNAVAILABLE",
     SubscriptionActivated = "SUBSCRIPTION_ACTIVATED",

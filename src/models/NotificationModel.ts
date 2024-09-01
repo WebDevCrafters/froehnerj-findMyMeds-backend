@@ -1,5 +1,6 @@
 import { Schema, model, Types } from "mongoose";
 import { Notification } from "../interfaces/schemaTypes/Notification";
+import { NotificationType } from "../interfaces/schemaTypes/enums/NotificationType";
 
 const NotificationSchema: Schema<Notification> = new Schema({
     userId: {

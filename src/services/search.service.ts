@@ -126,9 +126,8 @@ class SearchService {
 
     async getSearch(
         searchId: string | Types.ObjectId,
-        selectors: string[] = []
     ): Promise<Search | null> {
-        const search = await SearchModel.findById(searchId).select(selectors);
+        const search = await SearchModel.findById(searchId);
         if (!search) return null;
         return this.makeSearchFromDoc(search);
     }

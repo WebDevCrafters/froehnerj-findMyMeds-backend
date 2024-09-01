@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { NotificationType } from "./enums/NotificationType";
 
 export interface Notification {
     notificationId?: Types.ObjectId;

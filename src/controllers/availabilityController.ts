@@ -6,6 +6,10 @@ import availabilityService from "../services/availability.service";
 import { ServerError } from "../classes/errors/serverError";
 import mongoose, { isValidObjectId, Types } from "mongoose";
 import isAvailability from "../utils/guards/isAvailibility";
+import searchService from "../services/search.service";
+import notificationService from "../services/notification.service";
+import { Notification } from "../interfaces/schemaTypes/Notification";
+import { NotificationType } from "../interfaces/schemaTypes/enums/NotificationType";
 
 class AvailabilityController implements AvailablityEndpoints {
     async add(req: Request, res: Response) {
@@ -16,7 +20,7 @@ class AvailabilityController implements AvailablityEndpoints {
             @todo: Check if user is a clinician
          */
 
-        if (!availability) throw new BadRequestError();
+        if (!availability || !availability.search) throw new BadRequestError();
 
         availability.clinician = user.userId;
 
@@ -33,6 +37,16 @@ class AvailabilityController implements AvailablityEndpoints {
 
         if (!insertedAvailability) throw new ServerError();
 
+        const search = await searchService.getSearch(availability.search);
+        if (search?.patient) {
+            const notification: Notification = {
+                createdOn: Date.now(),
+                isRead: false,
+                notificationType: NotificationType.MarkAsAvailable,
+                userId: search.patient._id,
+            };
+            notificationService.insertAndSend(notification);
+        }
         res.json(insertedAvailability);
     }
 

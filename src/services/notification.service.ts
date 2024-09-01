@@ -3,8 +3,9 @@ import { Notification } from "../interfaces/schemaTypes/Notification";
 import { Document, Types } from "mongoose";
 
 class NotificationService {
-    async insert(notification: Notification) {
+    async insertAndSend(notification: Notification) {
         const newNotification = await NotificationModel.create(notification);
+        this.send(notification);
         return newNotification;
     }
 
@@ -20,8 +21,6 @@ class NotificationService {
     }
 
     async send(notification: Notification) {
-        const savedNotification = await this.insert(notification);
-        return savedNotification;
     }
 
     async getNotifications(userId: string, page: number, limit: number) {
