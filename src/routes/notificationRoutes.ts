@@ -7,5 +7,6 @@ const notificationRouter = express.Router();
 
 notificationRouter.use(validateTokenHandler)
 notificationRouter.route("/").get(asyncHandler(notificationController.getNotifications));
+notificationRouter.route("/update").put(asyncHandler(notificationController.update));
 
 export default notificationRouter;

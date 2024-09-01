@@ -3,9 +3,9 @@ import { NotificationType } from "./enums/NotificationType";
 
 export interface Notification {
     notificationId?: Types.ObjectId;
-    notificationType: NotificationType;
-    createdOn: number;
+    notificationType?: NotificationType;
+    createdOn?: number;
     userId?: Types.ObjectId;
-    isRead: boolean;
+    isRead?: boolean;
     data?: any;
 }

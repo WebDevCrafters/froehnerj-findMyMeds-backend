@@ -17,7 +17,7 @@ class NotificationService {
         );
         if (!updatedNotification) return null;
 
-        return updatedNotification;
+        return this.mapToNotification(updatedNotification);
     }
 
     async send(notification: Notification) {
@@ -31,10 +31,10 @@ class NotificationService {
             .sort({ createdOn: -1 })
             .skip(skip)
             .limit(limit);
-        return notifications.map((doc) => this.mapToMotification(doc));
+        return notifications.map((doc) => this.mapToNotification(doc));
     }
 
-    mapToMotification(
+    mapToNotification(
         notificationDoc: Document<unknown, {}, Notification> &
             Notification & {
                 _id: Types.ObjectId;
