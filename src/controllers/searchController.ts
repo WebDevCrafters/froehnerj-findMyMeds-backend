@@ -194,14 +194,19 @@ class SearchController implements SearchEndpoints {
             if (!medication.alternatives) medication.alternatives = [];
 
             const updatedMedication = await medicationService.updateMedication(
-                medication
+                medication,
+                { session }
             );
 
             const location = await userService.getCoordinates(search.zipCode);
             search.medication = medication.medicationId;
             search.location = convertToDBLocation(location);
 
-            const updatedSearch = await searchService.updateSearch(search);
+            const updatedSearch = await searchService.updateSearch(
+                search,
+                false,
+                { session }
+            );
 
             const searchRes = {
                 ...updatedSearch,

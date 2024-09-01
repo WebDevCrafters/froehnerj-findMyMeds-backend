@@ -56,11 +56,18 @@ class MedicationService {
         });
     }
 
-    async updateMedication(medication: Medication) {
+    async updateMedication(
+        medication: Medication,
+        options?: { session?: ClientSession }
+    ) {
         const updatedMedication = await MedicationModel.findByIdAndUpdate(
             medication.medicationId,
             medication,
-            { new: true, runValidators: true }
+            {
+                new: true,
+                runValidators: true,
+                session: options?.session,
+            }
         );
 
         if (!updatedMedication) return null;

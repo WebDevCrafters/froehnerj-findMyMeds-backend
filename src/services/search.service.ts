@@ -124,8 +124,11 @@ class SearchService {
         return nearbySearchesAgg.map((doc) => this.makeSearchFromDoc(doc));
     }
 
-    async getSearch(searchId: string | Types.ObjectId): Promise<Search | null> {
-        const search = await SearchModel.findById(searchId);
+    async getSearch(
+        searchId: string | Types.ObjectId,
+        selectors: string[] = []
+    ): Promise<Search | null> {
+        const search = await SearchModel.findById(searchId).select(selectors);
         if (!search) return null;
         return this.makeSearchFromDoc(search);
     }
@@ -170,7 +173,8 @@ class SearchService {
 
     async updateSearch(
         search: Search,
-        isStatusUpdateAllowed: boolean = false
+        isStatusUpdateAllowed: boolean = false,
+        options?: { session?: ClientSession }
     ): Promise<Search | null> {
         let searchToUpdate = search;
 
@@ -182,7 +186,7 @@ class SearchService {
         const updatedSearch = await SearchModel.findByIdAndUpdate(
             search.searchId,
             searchToUpdate,
-            { new: true, runValidators: true }
+            { new: true, runValidators: true, session: options?.session }
         );
 
         if (!updatedSearch) return null;
