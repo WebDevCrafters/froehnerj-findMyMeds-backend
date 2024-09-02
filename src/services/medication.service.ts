@@ -33,6 +33,8 @@ class MedicationService {
         medications: (Types.ObjectId | Medication)[],
         options?: { session?: ClientSession }
     ): Promise<Medication[]> {
+        if (!medications || !medications.length) return [];
+
         for (let medication of medications) {
             if (!isMedication(medication))
                 throw new BadRequestError("Invalid medication");
@@ -81,15 +83,17 @@ class MedicationService {
                 _id: Types.ObjectId;
             }
     ): Medication {
-        let alternatives: Medication[] = medication.alternatives.map(
-            (ele: Medication | Types.ObjectId) => {
+        let alternatives = medication.alternatives.map(
+            (ele: (Medication & { _id?: Types.ObjectId }) | Types.ObjectId) => {
+                if (!isMedication(ele)) return ele;
+
                 return {
-                    medicationId: medication._id,
-                    brandName: medication.brandName,
-                    dose: medication.dose,
-                    name: medication.name,
-                    pickUpDate: medication.pickUpDate,
-                    quantity: medication.quantity,
+                    medicationId: ele._id,
+                    brandName: ele.brandName,
+                    dose: ele.dose,
+                    name: ele.name,
+                    pickUpDate: ele.pickUpDate,
+                    quantity: ele.quantity,
                     alternatives: [],
                 };
             }
@@ -102,7 +106,7 @@ class MedicationService {
             name: medication.name,
             pickUpDate: medication.pickUpDate,
             quantity: medication.quantity,
-            alternatives: alternatives,
+            alternatives: alternatives as Medication[],
         };
     }
 }
