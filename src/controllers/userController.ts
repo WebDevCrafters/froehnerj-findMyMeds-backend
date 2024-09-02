@@ -117,19 +117,15 @@ class UserController implements UserEndpoints {
         const updateUserRequest = req.body;
 
         if (!updateUserRequest) throw new BadRequestError();
+        const userId = req.user?.userId;
 
-        const { _id: userId, password } = updateUserRequest;
-
-        if (!mongoose.isValidObjectId(userId)) {
-            throw new BadRequestError("Invalid user Id");
-        }
+        const { password } = updateUserRequest;
 
         let hashedPassword;
         if (password) {
             hashedPassword = await hashPassword(password);
+            updateUserRequest.password = hashedPassword;
         }
-
-        updateUserRequest.password = hashedPassword;
 
         const updatedUser = await UserModel.findByIdAndUpdate(
             userId,
