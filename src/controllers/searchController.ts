@@ -193,6 +193,36 @@ class SearchController implements SearchEndpoints {
 
             if (!medication.alternatives) medication.alternatives = [];
 
+            let updatedAlternativeIds = [];
+            let alternativesToAdd = [];
+            for (let i = 0; i < medication.alternatives.length; i++) {
+                const currAlt = medication.alternatives[i];
+
+                if (!isMedication(currAlt)) continue;
+                if (currAlt.medicationId) {
+                    updatedAlternativeIds.push(currAlt.medicationId);
+                    medicationService.updateMedication(currAlt, {
+                        session,
+                    });
+
+                    continue;
+                }
+
+                alternativesToAdd.push(currAlt);
+            }
+
+            const insertedAlternatives =
+                await medicationService.insertMedicationBulk(
+                    alternativesToAdd,
+                    { session }
+                );
+
+            insertedAlternatives.forEach((ele) =>
+                updatedAlternativeIds.push(ele.medicationId)
+            );
+
+            medication.alternatives = updatedAlternativeIds;
+
             const updatedMedication = await medicationService.updateMedication(
                 medication,
                 { session }
