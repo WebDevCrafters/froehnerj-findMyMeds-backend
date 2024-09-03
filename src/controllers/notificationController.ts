@@ -18,9 +18,9 @@ class NotificationController {
             notification
         );
 
-        if(!notification) throw new NotFoundError();
+        if (!notification) throw new NotFoundError();
 
-        res.json(updatedNotification)
+        res.json(updatedNotification);
     }
 
     send(req: Request, res: Response) {}
@@ -38,6 +38,22 @@ class NotificationController {
         if (!notifications || !notifications.length) throw new NotFoundError();
 
         res.json(notifications);
+    }
+
+    async markAllAsRead(req: Request, res: Response) {
+        const user = req.user;
+
+        await notificationService.markAllAsRead(user.userId);
+
+        res.json("Success");
+    }
+
+    async getUnreadCount(req: Request, res: Response) {
+        const user = req.user;
+
+        const count = await notificationService.getUnreadCount(user.userId);
+
+        res.json({ count });
     }
 }
 

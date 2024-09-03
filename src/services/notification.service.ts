@@ -25,7 +25,11 @@ class NotificationService {
         SocketService.getInstance().sendNotificationToUser(notification);
     }
 
-    async getNotifications(userId: string | Types.ObjectId, page: number, limit: number) {
+    async getNotifications(
+        userId: string | Types.ObjectId,
+        page: number,
+        limit: number
+    ) {
         const skip = (page - 1) * limit;
         const notifications = await NotificationModel.find({
             userId: new Types.ObjectId(userId),
@@ -34,6 +38,24 @@ class NotificationService {
             .skip(skip)
             .limit(limit);
         return notifications.map((doc) => this.mapToNotification(doc));
+    }
+
+    async markAllAsRead(userId: string | Types.ObjectId): Promise<boolean> {
+        const notifications = await NotificationModel.updateMany(
+            { userId: userId, isRead: false },
+            { $set: { isRead: true } }
+        );
+
+        return true;
+    }
+
+    async getUnreadCount(userId: string | Types.ObjectId): Promise<number> {
+        const count = await NotificationModel.countDocuments({
+            userId: userId,
+            isRead: false,
+        });
+
+        return count;
     }
 
     mapToNotification(
@@ -48,7 +70,7 @@ class NotificationService {
             isRead: notificationDoc.isRead,
             notificationType: notificationDoc.notificationType,
             userId: notificationDoc.userId,
-            data: notificationDoc.data
+            data: notificationDoc.data,
         };
     }
 }
