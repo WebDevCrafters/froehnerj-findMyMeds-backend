@@ -124,10 +124,16 @@ class SearchService {
         return nearbySearchesAgg.map((doc) => this.makeSearchFromDoc(doc));
     }
 
-    async getSearch(
-        searchId: string | Types.ObjectId,
-    ): Promise<Search | null> {
-        const search = await SearchModel.findById(searchId);
+    async getSearch(searchId: string | Types.ObjectId): Promise<Search | null> {
+        const search = await SearchModel.findById(searchId).populate({
+            path: "medication",
+            select: "-__v",
+            populate: {
+                path: "alternatives",
+                model: "Medication",
+                select: "-__v",
+            },
+        });
         if (!search) return null;
         return this.makeSearchFromDoc(search);
     }
