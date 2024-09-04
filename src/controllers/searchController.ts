@@ -7,7 +7,7 @@ import SearchModel from "../models/SearchModel";
 import { medicationController } from "./MedicationController";
 import { SearchStatus } from "../interfaces/schemaTypes/enums/SearchStatus";
 import isMedication from "../utils/guards/isMedication";
-import mongoose, { ClientSession, Types } from "mongoose";
+import mongoose, { ClientSession, mongo, Types } from "mongoose";
 import medicationService from "../services/medication.service";
 import searchService from "../services/search.service";
 import SecureUser from "../interfaces/responses/SecureUser";
@@ -70,10 +70,6 @@ class SearchController implements SearchEndpoints {
 
             newMedication.alternatives = insertedAlternatives;
 
-            /** 
-                @todo: Search status according to payment status
-            **/
-
             let newSearch: Search = {
                 medication: newMedication.medicationId,
                 patient: user.userId,
@@ -90,10 +86,6 @@ class SearchController implements SearchEndpoints {
             let searchResult = await searchService.insertSearch(newSearch, {
                 session,
             });
-
-            /**
-                @todo: different function increse searchConsumed
-             */
 
             let subscriptionId = null;
 
@@ -260,22 +252,62 @@ class SearchController implements SearchEndpoints {
     markAsAvailable(req: Request, res: Response) {}
 
     async markStatus(req: Request, res: Response) {
-        const { searchId, status } = req.body;
+        const session = await mongoose.startSession();
+        try {
+            const { searchId, status } = req.body;
+            const user = req.user;
 
-        if (
-            !searchId ||
-            !Object.values(SearchStatus).includes(status as SearchStatus)
-        ) {
-            throw new BadRequestError();
+            if (
+                !searchId ||
+                !Object.values(SearchStatus).includes(status as SearchStatus)
+            ) {
+                throw new BadRequestError("Invalid search status");
+            }
+
+            const search: Search = {
+                searchId: new Types.ObjectId(searchId),
+                status: status as SearchStatus,
+            };
+            const updatedSearch = await searchService.updateSearch(
+                search,
+                true,
+                { session }
+            );
+
+            //Increment search consumed
+            const prevPayment = await paymentService.getActivePaymentByUserId(
+                user.userId
+            );
+            let subscriptionId = null;
+
+            if (prevPayment && prevPayment.status !== PaymentStatus.UNPAID) {
+                if (isSubscription(prevPayment.subscription)) {
+                    subscriptionId = prevPayment.subscription.subscriptionId;
+                }
+
+                if (!subscriptionId)
+                    throw new BadRequestError("Subscriptoin does not exist");
+
+                const updatePaymentReq: Payment = {
+                    ...prevPayment,
+                    subscription: subscriptionId,
+                    searchesConsumed: prevPayment.searchesConsumed + 1,
+                };
+
+                const newPayment = await paymentService.updatePayment(
+                    updatePaymentReq,
+                    { session }
+                );
+            }
+
+            res.json(updatedSearch);
+            await session.commitTransaction();
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            await session.endSession();
         }
-
-        const search: Search = {
-            searchId: new Types.ObjectId(searchId),
-            status: status as SearchStatus,
-        };
-        const updatedSearch = await searchService.updateSearch(search, true);
-
-        res.json(updatedSearch);
     }
 }
 
