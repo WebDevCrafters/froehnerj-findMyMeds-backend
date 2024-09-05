@@ -96,6 +96,24 @@ class PharmacyService {
         return nearByPharmacies.map((doc) => this.formatPharmacy(doc));
     }
 
+    async getPharmacyFaxesInRadiusCount(
+        userCoordinates: number[],
+        radiusMiles: number
+    ) {
+        const radiusRadians = radiusMiles / 3963.2;
+
+        const count = await PharmacyModel.countDocuments({
+            location: {
+                $geoWithin: {
+                    $centerSphere: [userCoordinates, radiusRadians],
+                },
+            },
+            $and: [{ faxNumber: { $ne: null } }, { faxNumber: { $ne: "--" } }],
+        });
+
+        return count;
+    }
+
     formatPharmacy(
         doc: Document<unknown, {}, Pharmacy> &
             Pharmacy & {

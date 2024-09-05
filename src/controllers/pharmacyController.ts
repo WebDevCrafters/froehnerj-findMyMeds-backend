@@ -14,16 +14,18 @@ import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
 import Search from "../interfaces/schemaTypes/Search";
 
 class PharmacyController {
-    async getPharmacyFaxesInRadius(req: Request, res: Response) {
+    async getPharmacyInRadius(req: Request, res: Response) {
         const user = req.user;
+        const { longitude, latitude } = req.query;
         const { page, limit } = req.query;
+
+        if (!longitude || !latitude)
+            throw new BadRequestError("Invalid co-ordinates");
+
         if (page === "0") throw new BadRequestError("Page starts from 1");
 
-        const userFromDB: User | null = await userService.getUser(user.email);
-        if (!userFromDB) throw new BadRequestError("Invalid api key");
-
         const pharmacies = await pharmacyService.getPharmacyFaxesInRadius(
-            userFromDB.location.coordinates,
+            [Number(longitude), Number(latitude)],
             30,
             [],
             Number(page),
@@ -33,6 +35,21 @@ class PharmacyController {
         if (!pharmacies || pharmacies.length === 0) throw new NotFoundError();
 
         res.json(pharmacies);
+    }
+
+    async getPharmacyInRadiusCount(req: Request, res: Response) {
+        const user = req.user;
+        const { longitude, latitude } = req.query;
+
+        if (!longitude || !latitude)
+            throw new BadRequestError("Invalid co-ordinates");
+
+        const count = await pharmacyService.getPharmacyFaxesInRadiusCount(
+            [Number(longitude), Number(latitude)],
+            30
+        );
+
+        res.json({ count: count });
     }
 
     async sendInvitation(req: Request, res: Response) {

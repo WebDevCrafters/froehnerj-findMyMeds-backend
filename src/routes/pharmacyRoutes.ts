@@ -8,7 +8,10 @@ const pharmacyRouter = express.Router();
 pharmacyRouter.use(validateTokenHandler);
 pharmacyRouter
     .route("/")
-    .get(asyncHandler(pharmacyController.getPharmacyFaxesInRadius));
+    .get(asyncHandler(pharmacyController.getPharmacyInRadius));
+pharmacyRouter
+    .route("/count")
+    .get(asyncHandler(pharmacyController.getPharmacyInRadiusCount));
 pharmacyRouter
     .route("/send")
     .post(asyncHandler(pharmacyController.sendInvitation));

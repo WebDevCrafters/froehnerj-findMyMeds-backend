@@ -239,7 +239,7 @@ class SearchService {
             );
         }
 
-        if (searchRes.location)
+        if (location)
             searchRes.location = convertToLocation(location);
         /**
                 @todo: Send status also 
