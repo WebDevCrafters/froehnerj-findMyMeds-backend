@@ -46,7 +46,8 @@ class SearchService {
                     model: "Medication",
                     select: "-__v",
                 },
-            });
+            })
+            .sort({ "medication.pickUpDate": 1 }); 
 
         if (!searches) throw new NotFoundError();
 
@@ -239,8 +240,7 @@ class SearchService {
             );
         }
 
-        if (location)
-            searchRes.location = convertToLocation(location);
+        if (location) searchRes.location = convertToLocation(location);
         /**
                 @todo: Send status also 
             */
