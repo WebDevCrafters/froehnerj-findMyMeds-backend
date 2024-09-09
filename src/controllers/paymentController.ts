@@ -17,7 +17,7 @@ class PaymentController implements PaymentsEndpoints {
         const user = req.user;
         payment.userId = user.userId;
         payment.searchesConsumed = 0;
-        payment.paidOn = Date.now();
+        // payment.paidOn = Date.now();
 
         if (!isPayment(payment)) throw new BadRequestError();
 

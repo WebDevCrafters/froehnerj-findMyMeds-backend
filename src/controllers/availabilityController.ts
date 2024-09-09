@@ -49,7 +49,7 @@ class AvailabilityController implements AvailablityEndpoints {
         if (search?.patient && clinician) {
             insertedAvailability.clinician = clinician;
             const notification: Notification = {
-                createdOn: Date.now(),
+                createdOn: availability.markedOn,
                 isRead: false,
                 notificationType: NotificationType.MarkAsAvailable,
                 userId: search.patient._id,
