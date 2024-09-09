@@ -10,7 +10,7 @@ class OTPController {
         res.status(200).json({ message: "OTP sent successfully" });
     }
 
-    async verifyOtpController(req: Request, res: Response): Promise<void> {
+    async verifyOtp(req: Request, res: Response): Promise<void> {
         const { email, otp } = req.body;
 
         const isValid = await otpService.verifyOtp(email, otp);

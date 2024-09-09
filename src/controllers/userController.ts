@@ -1,5 +1,5 @@
 import { UserEndpoints } from "../interfaces/endpoints/userEndpoints";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import UserModel from "../models/UserModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { ConflictError } from "../classes/errors/conflictError";
@@ -10,12 +10,14 @@ import { ForbiddenError } from "../classes/errors/forbiddenError";
 import SecureUser from "../interfaces/responses/SecureUser";
 import { comparePassword, hashPassword } from "../utils/bcryptManager";
 import { UnauthorizedError } from "../classes/errors/unauthorizedError";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { AuthResponseJSON } from "../interfaces/responses/AuthResponse";
 import isLocation from "../utils/guards/isLocation";
 import userService from "../services/user.service";
 import { convertToDBLocation } from "../interfaces/responses/Location";
 import { convertToLocation } from "../interfaces/schemaTypes/DBLocation";
+import { ServerError } from "../classes/errors/serverError";
+import otpService from "../services/otp.service";
 
 class UserController implements UserEndpoints {
     public async signIn(req: Request, res: Response) {
@@ -158,6 +160,60 @@ class UserController implements UserEndpoints {
         const secureUser = await userService.getSecureUser(idetifier);
         if (!secureUser) throw new NotFoundError();
         res.json(secureUser);
+    }
+
+    async updatePassword(req: Request, res: Response) {
+        const { userId } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 6) {
+            throw new BadRequestError(
+                "Password must be at least 6 characters long"
+            );
+        }
+
+        const success = await userService.updatePassword(
+            new Types.ObjectId(userId),
+            newPassword
+        );
+
+        if (success) {
+            res.json("Password updated successfully");
+        } else {
+            throw new ServerError("Password update failed");
+        }
+    }
+
+    async forgotPassword(req: Request, res: Response) {
+        const { email } = req.body;
+        const otp = await otpService.generateOtp(email);
+        await otpService.sendOtpEmail(email, otp);
+        res.json("Otp sent");
+    }
+
+    async resetPassword(req: Request, res: Response) {
+        const { email, otp, newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({
+                message: "Password must be at least 6 characters long",
+            });
+        }
+
+        const isValid = await otpService.verifyOtp(email, otp);
+        if (isValid) {
+            const userUpdated = await userService.updatePassword(
+                email,
+                newPassword
+            );
+            if (userUpdated) {
+                res.json("Password updated successfully");
+            } else {
+                throw new ServerError("Failed to update password");
+            }
+        } else {
+            throw new BadRequestError("Incorrect or expired OTP.");
+        }
     }
 
     sendOTP(req: Request, res: Response) {}

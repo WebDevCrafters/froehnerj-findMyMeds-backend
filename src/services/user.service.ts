@@ -8,6 +8,7 @@ import { ServerError } from "../classes/errors/serverError";
 import UserModel from "../models/UserModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { convertToLocation } from "../interfaces/schemaTypes/DBLocation";
+import { hashPassword } from "../utils/bcryptManager";
 dotenv.config();
 
 class UserService {
@@ -123,6 +124,24 @@ class UserService {
         const nearbyUserIds = nearbyUsers.map((user) => user._id);
 
         return nearbyUserIds;
+    }
+
+    async updatePassword(
+        email: Types.ObjectId,
+        newPassword: string
+    ): Promise<boolean> {
+        const user = await UserModel.findOne({email});
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        const hashedPassword = await hashPassword(newPassword);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        return true;
     }
 }
 

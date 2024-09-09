@@ -16,5 +16,11 @@ userRouter
 userRouter
     .route("/update")
     .put(validateTokenHandler, asyncHandler(userController.updateUser));
+userRouter
+    .route("/forgot-password")
+    .post(asyncHandler(userController.forgotPassword));
+userRouter
+    .route("/reset-password")
+    .post(asyncHandler(userController.resetPassword));
 
 export default userRouter;
