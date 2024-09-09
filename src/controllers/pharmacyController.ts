@@ -12,6 +12,8 @@ import { generateFaxMessage } from "../constants/faxMessage";
 import isMedication from "../utils/guards/isMedication";
 import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
 import Search from "../interfaces/schemaTypes/Search";
+import dotenv from 'dotenv';
+dotenv.config();
 
 class PharmacyController {
     async getPharmacyInRadius(req: Request, res: Response) {
@@ -69,13 +71,11 @@ class PharmacyController {
             ["name", "faxNumber"]
         );
         let sendFaxBulkReq: SendFaxRequest[] = [];
-
-        for (let i = 0; i < 3; i++) {
-            const toFaxNumber = "+19292070142";
+        if(process.env.IFAX_ACCESS_TOKEN)
+        for (let i = 0; i < nearByPharmacies.length; i++) {
+            const toFaxNumber = nearByPharmacies[i].faxNumber;
             const toName =
-                nearByPharmacies[i].name +
-                "  this is  " +
-                nearByPharmacies[i].faxNumber;
+                nearByPharmacies[i].name;
             const faxMessage = generateFaxMessage(nearByPharmacies[i], search);
             sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
         }
