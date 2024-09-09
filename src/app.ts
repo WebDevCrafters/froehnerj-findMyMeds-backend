@@ -13,6 +13,7 @@ import notificationRouter from "./routes/notificationRoutes";
 import { createServer } from "http";
 import { Socket, Server } from "socket.io";
 import SocketService from "./services/socket.service";
+import OTPRouter from "./routes/otpRoutes";
 
 dotenv.config();
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/availability", availabilityRouter);
 app.use("/api/pharmacies", pharmacyRouter);
 app.use("/api/notification", notificationRouter);
+app.use("/api/otp", OTPRouter);
 app.use(errorHandler);
 
 export default app;
