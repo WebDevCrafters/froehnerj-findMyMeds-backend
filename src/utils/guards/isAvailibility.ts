@@ -6,7 +6,8 @@ function isAvailability(object: any): object is Availability {
         object &&
         typeof object === "object" &&
         "clinician" in object &&
-        "search" in object
+        "search" in object &&
+        "markedOn" in object 
     );
 }
 
