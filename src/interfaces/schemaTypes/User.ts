@@ -10,7 +10,7 @@ interface User {
     userType: UserType;
     dob: number;
     password: string;
-    zipCode: number;
+    zipCode: string;
     doctorId: Types.ObjectId;
     location: DBLocation;
 }

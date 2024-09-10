@@ -10,7 +10,7 @@ const UserSchema: Schema<User> = new Schema({
     dob: { type: Number },
     password: { type: String, required: true },
     doctorId: { type: Schema.Types.ObjectId, ref: "Doctor" },
-    zipCode: { type: Number, required: true },
+    zipCode: { type: String, required: true },
     location: {
         type: {
             type: String,

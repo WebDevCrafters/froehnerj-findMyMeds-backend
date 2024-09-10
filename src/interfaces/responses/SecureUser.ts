@@ -11,7 +11,7 @@ interface SecureUser {
     dob: number;
     doctorId: Types.ObjectId;
     location: Location;
-    zipCode: number
+    zipCode: string
 }
 
 export default SecureUser;

@@ -21,7 +21,7 @@ const SearchSchema: Schema<Search> = new Schema({
             required: true,
         },
     },
-    zipCode: { type: Number, required: true },
+    zipCode: { type: String, required: true },
     prescriberName: { type: String },
     dob: { type: Number }
 });
