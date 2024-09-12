@@ -20,6 +20,7 @@ import { convertToDBLocation } from "../interfaces/responses/Location";
 import isLocation from "../utils/guards/isLocation";
 import userService from "../services/user.service";
 import { NotFoundError } from "../classes/errors/notFoundError";
+import pharmacyController from "./pharmacyController";
 
 class SearchController implements SearchEndpoints {
     async add(req: Request, res: Response) {
@@ -36,6 +37,7 @@ class SearchController implements SearchEndpoints {
                 throw new BadRequestError("Invalid medication");
 
             if (!medication.alternatives) medication.alternatives = [];
+            const finalMiles = Number(search.miles) || 30;
 
             const prevPayment = await paymentService.getActivePaymentByUserId(
                 user.userId
@@ -61,7 +63,7 @@ class SearchController implements SearchEndpoints {
                     search.zipCode
                 );
 
-            const location = convertToDBLocation(search.location);
+            const dBLocation = convertToDBLocation(search.location);
 
             const newMedication = await medicationService.insertMedication(
                 medicationToAdd,
@@ -74,10 +76,11 @@ class SearchController implements SearchEndpoints {
                 medication: newMedication.medicationId,
                 patient: user.userId,
                 status: SearchStatus.InProgress,
-                location: location,
+                location: dBLocation,
                 prescriberName: search.prescriberName,
                 zipCode: search.zipCode,
                 dob: search.dob,
+                miles: finalMiles
             };
 
             if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)
@@ -89,9 +92,14 @@ class SearchController implements SearchEndpoints {
 
             let subscriptionId = null;
 
+            const sentFaxResult = await pharmacyController.getPharmaciesAndSendFax(dBLocation.coordinates, finalMiles, newSearch);
+            let filteredFaxSentResult = sentFaxResult.map((ele: any) => ele.value.data)
+
+            if(!filteredFaxSentResult || !filteredFaxSentResult.length) throw new ServerError("Failed to send faxes");
+
             if (prevPayment && prevPayment.status !== PaymentStatus.UNPAID) {
                 if (isSubscription(prevPayment.subscription)) {
-                    subscriptionId = prevPayment.subscription.subscriptionId;
+                    subscriptionId = prevPayment.subscription.subscriptionId; 
                 }
 
                 if (!subscriptionId)

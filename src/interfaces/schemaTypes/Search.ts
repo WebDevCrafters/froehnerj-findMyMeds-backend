@@ -14,6 +14,7 @@ interface Search {
     location?: DBLocation | Location;
     prescriberName?: string;
     dob?: number;
+    miles?: number;
 }
 
 export default Search;

@@ -79,12 +79,15 @@ class PharmacyController {
         coordinates: [number, number],
         finalMiles: number,
         search: Search
-    ) {
+    ): Promise<any[]> {
         const nearByPharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             coordinates,
             finalMiles,
             ["name", "faxNumber"]
         );
+
+        if(!nearByPharmacies || !nearByPharmacies.length) throw new NotFoundError("No nearby pharmacies found")
+
         let sendFaxBulkReq: SendFaxRequest[] = [];
         const count = 1; //nearByPharmacies.length;
         if (process.env.IFAX_ACCESS_TOKEN)

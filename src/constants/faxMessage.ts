@@ -16,9 +16,9 @@ export function generateFaxMessage(pharmacy: Pharmacy, search: Search, miles: nu
     Dosage: ${medication?.dose || ""}<br>
     Quantity: ${medication?.quantity || ""}<br>`;
 
-    if (medication.alternatives.length > 0) {
+    if (medication?.alternatives?.length > 0) {
         message += `The patient is also open to the following alternatives:<br>`;
-        medication.alternatives.forEach((alt, index) => {
+        medication?.alternatives?.forEach((alt, index) => {
             const alternative = alt as Medication;
             message += `Alternative ${index + 1}:<br>`;
             message += `- Name: ${alternative?.name || ""}<br>`;
