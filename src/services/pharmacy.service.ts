@@ -88,16 +88,30 @@ class PharmacyService {
         page?: number,
         limit?: number
     ) {
-        const radiusRadians = radiusMiles / 3963.2;
+        // const radiusRadians = radiusMiles / 3963.2;
 
+        // const query = PharmacyModel.find({
+        //     location: {
+        //         $geoWithin: {
+        //             $centerSphere: [userCoordinates, radiusRadians],
+        //         },
+        //     },
+        //     $and: [{ faxNumber: { $ne: null } }, { faxNumber: { $ne: "--" } }],
+        // }).select(select);
+
+        let radiusMeters = radiusMiles * 1609.34;
         const query = PharmacyModel.find({
             location: {
-                $geoWithin: {
-                    $centerSphere: [userCoordinates, radiusRadians],
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: userCoordinates,
+                    },
+                    $maxDistance: radiusMeters, 
                 },
             },
             $and: [{ faxNumber: { $ne: null } }, { faxNumber: { $ne: "--" } }],
-        }).select(select);
+        }).select(select).limit(50);
 
         if (page !== undefined && limit !== undefined) {
             const skip = (page - 1) * limit;

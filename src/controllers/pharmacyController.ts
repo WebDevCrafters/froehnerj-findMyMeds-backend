@@ -12,14 +12,14 @@ import { generateFaxMessage } from "../constants/faxMessage";
 import isMedication from "../utils/guards/isMedication";
 import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
 import Search from "../interfaces/schemaTypes/Search";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 class PharmacyController {
     async getPharmacyInRadius(req: Request, res: Response) {
         const user = req.user;
         const { longitude, latitude } = req.query;
-        const { page, limit } = req.query;
+        const { page, limit, miles } = req.query;
 
         if (!longitude || !latitude)
             throw new BadRequestError("Invalid co-ordinates");
@@ -28,10 +28,10 @@ class PharmacyController {
 
         const pharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             [Number(longitude), Number(latitude)],
-            30,
+            Number(miles) || 30,
             [],
-            Number(page),
-            Number(limit)
+            // Number(page),
+            // Number(limit)
         );
 
         if (!pharmacies || pharmacies.length === 0) throw new NotFoundError();
@@ -41,14 +41,14 @@ class PharmacyController {
 
     async getPharmacyInRadiusCount(req: Request, res: Response) {
         const user = req.user;
-        const { longitude, latitude } = req.query;
+        const { longitude, latitude, miles } = req.query;
 
         if (!longitude || !latitude)
             throw new BadRequestError("Invalid co-ordinates");
 
         const count = await pharmacyService.getPharmacyFaxesInRadiusCount(
             [Number(longitude), Number(latitude)],
-            30
+            Number(miles) || 30
         );
 
         res.json({ count: count });
@@ -56,6 +56,8 @@ class PharmacyController {
 
     async sendInvitation(req: Request, res: Response) {
         const user = req.user;
+        const { miles } = req.query;
+        const finalMiles = Number(miles) || 30;
 
         let search = req.body;
         search = search as Search;
@@ -67,20 +69,22 @@ class PharmacyController {
 
         const nearByPharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             dbLocation.coordinates,
-            30,
+            finalMiles,
             ["name", "faxNumber"]
         );
         let sendFaxBulkReq: SendFaxRequest[] = [];
+        const count  = 1 //nearByPharmacies.length;
         if(process.env.IFAX_ACCESS_TOKEN)
-        for (let i = 0; i < nearByPharmacies.length; i++) {
-            const toFaxNumber = nearByPharmacies[i].faxNumber;
+        for (let i = 0; i < count; i++) {
+            // const toFaxNumber = nearByPharmacies[i].faxNumber;
+            const toFaxNumber = "+19292070142";
             const toName =
                 nearByPharmacies[i].name;
-            const faxMessage = generateFaxMessage(nearByPharmacies[i], search);
+            const faxMessage = generateFaxMessage(nearByPharmacies[i], search, finalMiles);
             sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
         }
         const allResponse = await pharmacyService.sendBulkFaxes(sendFaxBulkReq);
-        res.json(allResponse);
+        res.json(allResponse.map((ele: any)=>ele.value.data));
     }
 
     async checkStatus(req: Request, res: Response) {
