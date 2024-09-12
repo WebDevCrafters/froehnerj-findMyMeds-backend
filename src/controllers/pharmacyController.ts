@@ -29,7 +29,7 @@ class PharmacyController {
         const pharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             [Number(longitude), Number(latitude)],
             Number(miles) || 30,
-            [],
+            []
             // Number(page),
             // Number(limit)
         );
@@ -39,7 +39,7 @@ class PharmacyController {
         res.json(pharmacies);
     }
 
-    async getPharmacyInRadiusCount(req: Request, res: Response) {
+    getPharmacyInRadiusCount = async (req: Request, res: Response) => {
         const user = req.user;
         const { longitude, latitude, miles } = req.query;
 
@@ -52,9 +52,9 @@ class PharmacyController {
         );
 
         res.json({ count: count });
-    }
+    };
 
-    async sendInvitation(req: Request, res: Response) {
+    sendInvitation = async (req: Request, res: Response) => {
         const user = req.user;
         const { miles } = req.query;
         const finalMiles = Number(miles) || 30;
@@ -67,24 +67,40 @@ class PharmacyController {
 
         const dbLocation = convertToDBLocation(search.location);
 
-        const nearByPharmacies = await pharmacyService.getPharmacyFaxesInRadius(
+        const allResponse = await this.getPharmaciesAndSendFax(
             dbLocation.coordinates,
+            finalMiles,
+            search
+        );
+        res.json(allResponse.map((ele: any) => ele.value.data));
+    };
+
+    async getPharmaciesAndSendFax(
+        coordinates: [number, number],
+        finalMiles: number,
+        search: Search
+    ) {
+        const nearByPharmacies = await pharmacyService.getPharmacyFaxesInRadius(
+            coordinates,
             finalMiles,
             ["name", "faxNumber"]
         );
         let sendFaxBulkReq: SendFaxRequest[] = [];
-        const count  = 1 //nearByPharmacies.length;
-        if(process.env.IFAX_ACCESS_TOKEN)
-        for (let i = 0; i < count; i++) {
-            // const toFaxNumber = nearByPharmacies[i].faxNumber;
-            const toFaxNumber = "+19292070142";
-            const toName =
-                nearByPharmacies[i].name;
-            const faxMessage = generateFaxMessage(nearByPharmacies[i], search, finalMiles);
-            sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
-        }
+        const count = 1; //nearByPharmacies.length;
+        if (process.env.IFAX_ACCESS_TOKEN)
+            for (let i = 0; i < count; i++) {
+                // const toFaxNumber = nearByPharmacies[i].faxNumber;
+                const toFaxNumber = "+19292070142";
+                const toName = nearByPharmacies[i].name;
+                const faxMessage = generateFaxMessage(
+                    nearByPharmacies[i],
+                    search,
+                    finalMiles
+                );
+                sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
+            }
         const allResponse = await pharmacyService.sendBulkFaxes(sendFaxBulkReq);
-        res.json(allResponse.map((ele: any)=>ele.value.data));
+        return allResponse;
     }
 
     async checkStatus(req: Request, res: Response) {

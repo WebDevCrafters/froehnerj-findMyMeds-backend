@@ -33,7 +33,7 @@ export function generateFaxMessage(pharmacy: Pharmacy, search: Search, miles: nu
 
     Best regards,<br>
     The FindMyMeds Team<br>
-    [Contact Information]<br>`;
+    Text (901) 609-8315 or email info@instockrx.com`;
 
     return message;
 }
