@@ -89,11 +89,12 @@ class PharmacyController {
         if(!nearByPharmacies || !nearByPharmacies.length) throw new NotFoundError("No nearby pharmacies found")
 
         let sendFaxBulkReq: SendFaxRequest[] = [];
-        const count = 1; //nearByPharmacies.length;
+        const count = nearByPharmacies.length;
+        // const count = 1;
         if (process.env.IFAX_ACCESS_TOKEN)
             for (let i = 0; i < count; i++) {
-                // const toFaxNumber = nearByPharmacies[i].faxNumber;
-                const toFaxNumber = "+19292070142";
+                const toFaxNumber = nearByPharmacies[i].faxNumber;
+                // const toFaxNumber = "+19292070142";
                 const toName = nearByPharmacies[i].name;
                 const faxMessage = generateFaxMessage(
                     nearByPharmacies[i],
