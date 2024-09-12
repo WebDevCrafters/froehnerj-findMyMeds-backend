@@ -91,19 +91,20 @@ class SearchController implements SearchEndpoints {
             });
 
             let subscriptionId = null;
-
-            const sentFaxResult =
-                await pharmacyController.getPharmaciesAndSendFax(
-                    dBLocation.coordinates,
-                    finalMiles,
-                    newSearch
+            if (newSearch.status === SearchStatus.InProgress) {
+                const sentFaxResult =
+                    await pharmacyController.getPharmaciesAndSendFax(
+                        dBLocation.coordinates,
+                        finalMiles,
+                        newSearch
+                    );
+                let filteredFaxSentResult = sentFaxResult.map(
+                    (ele: any) => ele.value.data
                 );
-            let filteredFaxSentResult = sentFaxResult.map(
-                (ele: any) => ele.value.data
-            );
 
-            if (!filteredFaxSentResult || !filteredFaxSentResult.length)
-                throw new ServerError("Failed to send faxes");
+                if (!filteredFaxSentResult || !filteredFaxSentResult.length)
+                    throw new ServerError("Failed to send faxes");
+            }
 
             if (prevPayment && prevPayment.status !== PaymentStatus.UNPAID) {
                 if (isSubscription(prevPayment.subscription)) {
