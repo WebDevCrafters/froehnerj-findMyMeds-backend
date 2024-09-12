@@ -92,7 +92,7 @@ class PaymentController implements PaymentsEndpoints {
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
         const amount = req.body?.amount;
-
+        
         const session = await stripe.checkout.sessions.create({
             payment_method_types: [
                 "card"
@@ -110,13 +110,56 @@ class PaymentController implements PaymentsEndpoints {
                 },
             ],
             mode: "payment",
-            success_url: `${"http://localhost:4200"}`,
-            cancel_url: `${"http://localhost:4200"}`,
+            success_url: `${process.env.CLIENT_URL}/app/dashboard/payments`,
+            cancel_url: `${process.env.CLIENT_URL}/app/dashboard/payments`,
             expand: ["payment_intent"],
         });
 
         return res.send(session);
     };
+
+    handleWebhook = async (req: Request, res: Response) => {
+        const sk = process.env.STRIPE_SK;
+        if (!sk) throw new ServerError("Invalid SK for stripe");
+        const stripe = new Stripe(sk);
+        const sig = req.headers['stripe-signature'];
+        const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    
+        if (!sig || !endpointSecret) {
+            return res.status(400).send('Webhook secret or signature missing.');
+        }
+    
+        let event: Stripe.Event;
+    
+        try {
+            event = stripe.webhooks.constructEvent(
+                req.body,
+                sig,
+                endpointSecret
+            );
+        } catch (err) {
+            return res.status(400).send(`Webhook Error: ${err}`);
+        }
+    
+        switch (event.type) {
+            case 'checkout.session.completed':
+                const session = event.data.object as Stripe.Checkout.Session;
+                // Execute your function here
+                await this.handleSuccessfulPayment(session);
+                break;
+            default:
+                console.log(`Unhandled event type ${event.type}`);
+        }
+    
+        res.status(200).json({ received: true });
+    };
+
+    handleSuccessfulPayment = async (session: Stripe.Checkout.Session) => {
+        // Your custom logic here, e.g., update user records, send notifications, etc.
+        console.log('Eissa Payment succeeded:', session);
+        // Perform additional actions like updating the database or notifying the user
+    };
+    
 }
 
 export default new PaymentController();
