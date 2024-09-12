@@ -55,7 +55,23 @@ class PharmacyService {
              */
             for (let i = 0; i < transformedData.length; i += batchSize) {
                 const batch = transformedData.slice(i, i + batchSize);
-                await PharmacyModel.insertMany(batch);
+
+                const validBatch = batch.map((pharmacy) => {
+                    const pharmacyLocation = pharmacy.location as {
+                        type: "Point";
+                        coordinates: [number | null, number | null];
+                    };
+                    if (
+                        !pharmacyLocation?.coordinates ||
+                        pharmacyLocation.coordinates.length !== 2 ||
+                        pharmacyLocation.coordinates.includes(null)
+                    ) {
+                        pharmacyLocation.coordinates = [0, 0];
+                    }
+                    return pharmacy;
+                });
+
+                await PharmacyModel.insertMany(validBatch);
                 console.log(`Inserted ${i + batch.length} records`);
             }
 
