@@ -119,6 +119,7 @@ class PaymentController implements PaymentsEndpoints {
     };
 
     handleWebhook = async (req: Request, res: Response) => {
+        console.log("Handle webhook called")
         const sk = process.env.STRIPE_SK;
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
