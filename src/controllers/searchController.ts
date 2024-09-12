@@ -292,12 +292,16 @@ class SearchController implements SearchEndpoints {
             );
 
             if (search.status === SearchStatus.InProgress) {
-                if (!updatedSearch?.location)
+                if(!search.searchId) throw new BadRequestError("Search does not exist");
+                
+                const fetchedSearch = await searchService.getSearch(search.searchId);
+
+                if (!fetchedSearch?.location)
                     throw new BadRequestError("Invalid search location");
                 let dbLocation;
 
-                if (isLocation(updatedSearch.location))
-                    dbLocation = convertToDBLocation(updatedSearch.location);
+                if (isLocation(fetchedSearch.location))
+                    dbLocation = convertToDBLocation(fetchedSearch.location);
 
                 if (!dbLocation?.coordinates)
                     throw new BadRequestError("Invalid search location");
@@ -305,8 +309,8 @@ class SearchController implements SearchEndpoints {
                 const sentFaxResult =
                     await pharmacyController.getPharmaciesAndSendFax(
                         dbLocation.coordinates,
-                        updatedSearch.miles || 30,
-                        updatedSearch
+                        fetchedSearch.miles || 30,
+                        fetchedSearch
                     );
                 let filteredFaxSentResult = sentFaxResult.map(
                     (ele: any) => ele.value.data
