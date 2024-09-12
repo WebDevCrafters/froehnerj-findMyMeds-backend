@@ -23,7 +23,8 @@ const SearchSchema: Schema<Search> = new Schema({
     },
     zipCode: { type: String, required: true },
     prescriberName: { type: String },
-    dob: { type: Number }
+    dob: { type: Number },
+    miles: { type: Number },
 });
 
 SearchSchema.index({ location: "2dsphere" });
