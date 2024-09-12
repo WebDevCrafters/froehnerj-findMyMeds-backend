@@ -10,5 +10,6 @@ paymentRouter.route("/").post(asyncHandler(paymentController.addPayment));
 paymentRouter.route("/").put(asyncHandler(paymentController.updatePayment));
 paymentRouter.route("/all").get(asyncHandler(paymentController.getAllPayments));
 paymentRouter.route("/").get(asyncHandler(paymentController.getActivePayment));
+paymentRouter.route("/stripe").post(asyncHandler(paymentController.stripeSession));
 
 export default paymentRouter;
