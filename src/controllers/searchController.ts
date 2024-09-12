@@ -80,7 +80,7 @@ class SearchController implements SearchEndpoints {
                 prescriberName: search.prescriberName,
                 zipCode: search.zipCode,
                 dob: search.dob,
-                miles: finalMiles
+                miles: finalMiles,
             };
 
             if (!prevPayment || prevPayment.status === PaymentStatus.UNPAID)
@@ -92,14 +92,22 @@ class SearchController implements SearchEndpoints {
 
             let subscriptionId = null;
 
-            const sentFaxResult = await pharmacyController.getPharmaciesAndSendFax(dBLocation.coordinates, finalMiles, newSearch);
-            let filteredFaxSentResult = sentFaxResult.map((ele: any) => ele.value.data)
+            const sentFaxResult =
+                await pharmacyController.getPharmaciesAndSendFax(
+                    dBLocation.coordinates,
+                    finalMiles,
+                    newSearch
+                );
+            let filteredFaxSentResult = sentFaxResult.map(
+                (ele: any) => ele.value.data
+            );
 
-            if(!filteredFaxSentResult || !filteredFaxSentResult.length) throw new ServerError("Failed to send faxes");
+            if (!filteredFaxSentResult || !filteredFaxSentResult.length)
+                throw new ServerError("Failed to send faxes");
 
             if (prevPayment && prevPayment.status !== PaymentStatus.UNPAID) {
                 if (isSubscription(prevPayment.subscription)) {
-                    subscriptionId = prevPayment.subscription.subscriptionId; 
+                    subscriptionId = prevPayment.subscription.subscriptionId;
                 }
 
                 if (!subscriptionId)
@@ -281,6 +289,31 @@ class SearchController implements SearchEndpoints {
                 true,
                 { session }
             );
+
+            if (search.status === SearchStatus.InProgress) {
+                if (!updatedSearch?.location)
+                    throw new BadRequestError("Invalid search location");
+                let dbLocation;
+
+                if (isLocation(updatedSearch.location))
+                    dbLocation = convertToDBLocation(updatedSearch.location);
+
+                if (!dbLocation?.coordinates)
+                    throw new BadRequestError("Invalid search location");
+
+                const sentFaxResult =
+                    await pharmacyController.getPharmaciesAndSendFax(
+                        dbLocation.coordinates,
+                        updatedSearch.miles || 30,
+                        updatedSearch
+                    );
+                let filteredFaxSentResult = sentFaxResult.map(
+                    (ele: any) => ele.value.data
+                );
+
+                if (!filteredFaxSentResult || !filteredFaxSentResult.length)
+                    throw new ServerError("Failed to send faxes");
+            }
 
             //Increment search consumed
             const prevPayment = await paymentService.getActivePaymentByUserId(
