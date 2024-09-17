@@ -14,6 +14,8 @@ import { createServer } from "http";
 import { Socket, Server } from "socket.io";
 import SocketService from "./services/socket.service";
 import OTPRouter from "./routes/otpRoutes";
+import asyncHandler from "./middleware/asyncHandler";
+import paymentController from "./controllers/paymentController";
 
 dotenv.config();
 const app = express();
@@ -25,6 +27,12 @@ app.use(
         origin: corsOrigin,
         methods: "GET,POST,PUT,DELETE",
     })
+);
+
+app.post(
+    "/webhook",
+    express.raw({ type: "application/json" }),
+    asyncHandler(paymentController.handleWebhook)
 );
 app.use(express.json());
 app.use("/api/user", userRouter);

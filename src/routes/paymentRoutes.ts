@@ -5,11 +5,11 @@ import { validateTokenHandler } from "../middleware/validateTokenHandler";
 
 const paymentRouter = express.Router();
 
-paymentRouter.route("/").post(validateTokenHandler, asyncHandler(paymentController.addPayment));
-paymentRouter.route("/").put(validateTokenHandler, asyncHandler(paymentController.updatePayment));
-paymentRouter.route("/all").get(validateTokenHandler, asyncHandler(paymentController.getAllPayments));
-paymentRouter.route("/").get(validateTokenHandler, asyncHandler(paymentController.getActivePayment));
-paymentRouter.route("/stripe").post(validateTokenHandler, asyncHandler(paymentController.stripeSession));
-paymentRouter.route("/webhook").post(asyncHandler(paymentController.handleWebhook));
+paymentRouter.use(validateTokenHandler);
+paymentRouter.route("/").post(asyncHandler(paymentController.addPayment));
+paymentRouter.route("/").put(asyncHandler(paymentController.updatePayment));
+paymentRouter.route("/all").get(asyncHandler(paymentController.getAllPayments));
+paymentRouter.route("/").get(asyncHandler(paymentController.getActivePayment));
+paymentRouter.route("/stripe").post(asyncHandler(paymentController.stripeSession));
 
 export default paymentRouter;
