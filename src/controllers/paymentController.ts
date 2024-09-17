@@ -124,9 +124,11 @@ class PaymentController implements PaymentsEndpoints {
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
         const sig = req.headers['stripe-signature'];
-        const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        console.log("headers are-----",req.headers)
+        const endpointSecret = process.env.STRIPE_SK;
     
         if (!sig || !endpointSecret) {
+            console.log({sig}, {endpointSecret})
             return res.status(400).send('Webhook secret or signature missing.');
         }
     
