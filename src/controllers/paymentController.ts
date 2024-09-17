@@ -91,7 +91,7 @@ class PaymentController implements PaymentsEndpoints {
         const sk = process.env.STRIPE_SK;
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
-        const amount = req.body?.amount;
+        const subs = req.body as Subscription;
         
         const session = await stripe.checkout.sessions.create({
             payment_method_types: [
@@ -102,9 +102,9 @@ class PaymentController implements PaymentsEndpoints {
                     price_data: {
                         currency: "usd",
                         product_data: {
-                            name: "Test payment",
+                            name: subs.name,
                         },
-                        unit_amount: amount,
+                        unit_amount: subs.cost,
                     },
                     quantity: 1,
                 },
@@ -124,11 +124,9 @@ class PaymentController implements PaymentsEndpoints {
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
         const sig = req.headers['stripe-signature'];
-        console.log("headers are-----",req.headers)
         const endpointSecret = process.env.WEBHOOK_SECRET;
     
         if (!sig || !endpointSecret) {
-            console.log({sig}, {endpointSecret})
             return res.status(400).send('Webhook secret or signature missing.');
         }
     
@@ -147,7 +145,6 @@ class PaymentController implements PaymentsEndpoints {
         switch (event.type) {
             case 'checkout.session.completed':
                 const session = event.data.object as Stripe.Checkout.Session;
-                // Execute your function here
                 await this.handleSuccessfulPayment(session);
                 break;
             default:
@@ -158,9 +155,7 @@ class PaymentController implements PaymentsEndpoints {
     };
 
     handleSuccessfulPayment = async (session: Stripe.Checkout.Session) => {
-        // Your custom logic here, e.g., update user records, send notifications, etc.
         console.log('Eissa Payment succeeded:', session);
-        // Perform additional actions like updating the database or notifying the user
     };
     
 }
