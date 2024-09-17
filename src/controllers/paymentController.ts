@@ -120,8 +120,8 @@ class PaymentController implements PaymentsEndpoints {
                 },
             ],
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL}/app/dashboard/payments`,
-            cancel_url: `${process.env.CLIENT_URL}/app/dashboard/payments`,
+            success_url: process.env.SUCCESS_URL,
+            cancel_url: process.env.FAILURE_URL,
             expand: ["payment_intent"],
             metadata: {
                 payment: JSON.stringify(payment),
