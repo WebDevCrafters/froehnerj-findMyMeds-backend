@@ -13,6 +13,8 @@ import { PaymentRequiredError } from "../classes/errors/paymentRequiredError";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import { ServerError } from "../classes/errors/serverError";
+import User from "../interfaces/schemaTypes/User";
+import SecureUser from "../interfaces/responses/SecureUser";
 dotenv.config();
 
 class PaymentController implements PaymentsEndpoints {
@@ -91,12 +93,20 @@ class PaymentController implements PaymentsEndpoints {
         const sk = process.env.STRIPE_SK;
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
-        const subs = req.body as Subscription;
-        
+        const payment = req.body as Payment;
+        let subs = null;
+        const user = req.user;
+
+        if (typeof payment.subscription === "string") {
+            subs = await subscriptionService.getSubscriptionById(
+                payment.subscription
+            );
+        }
+
+        if (!subs) throw new BadRequestError("Invalid subscription");
+
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: [
-                "card"
-            ],
+            payment_method_types: ["card"],
             line_items: [
                 {
                     price_data: {
@@ -113,25 +123,29 @@ class PaymentController implements PaymentsEndpoints {
             success_url: `${process.env.CLIENT_URL}/app/dashboard/payments`,
             cancel_url: `${process.env.CLIENT_URL}/app/dashboard/payments`,
             expand: ["payment_intent"],
+            metadata: {
+                payment: JSON.stringify(payment),
+                user: JSON.stringify(user),
+            },
         });
 
         return res.send(session);
     };
 
     handleWebhook = async (req: Request, res: Response) => {
-        console.log("Handle webhook called")
+        console.log("Handle webhook called");
         const sk = process.env.STRIPE_SK;
         if (!sk) throw new ServerError("Invalid SK for stripe");
         const stripe = new Stripe(sk);
-        const sig = req.headers['stripe-signature'];
+        const sig = req.headers["stripe-signature"];
         const endpointSecret = process.env.WEBHOOK_SECRET;
-    
+
         if (!sig || !endpointSecret) {
-            return res.status(400).send('Webhook secret or signature missing.');
+            return res.status(400).send("Webhook secret or signature missing.");
         }
-    
+
         let event: Stripe.Event;
-    
+
         try {
             event = stripe.webhooks.constructEvent(
                 req.body,
@@ -141,23 +155,49 @@ class PaymentController implements PaymentsEndpoints {
         } catch (err) {
             return res.status(400).send(`Webhook Error: ${err}`);
         }
-    
+
         switch (event.type) {
-            case 'checkout.session.completed':
+            case "checkout.session.completed":
                 const session = event.data.object as Stripe.Checkout.Session;
-                await this.handleSuccessfulPayment(session);
+                const payment = JSON.parse(session?.metadata?.payment || "") as Payment;
+                    const user = JSON.parse(session?.metadata?.user || "") as SecureUser;
+
+                await this.handleSuccessfulPayment(payment, user);
                 break;
             default:
                 console.log(`Unhandled event type ${event.type}`);
         }
-    
+
         res.status(200).json({ received: true });
     };
 
-    handleSuccessfulPayment = async (session: Stripe.Checkout.Session) => {
-        console.log('Eissa Payment succeeded:', session);
+    handleSuccessfulPayment = async (
+        payment: Payment,
+        user: SecureUser
+    ) => {
+        console.log("Payment succeeded");
+        payment.userId = user.userId;
+        payment.searchesConsumed = 0;
+        // payment.paidOn = Date.now();
+
+        if (!isPayment(payment)) throw new BadRequestError();
+
+        if (
+            !isValidObjectId(payment.userId) ||
+            !isValidObjectId(payment.subscription)
+        )
+            throw new BadRequestError("Invalid ObjectId");
+
+        const subscription = payment.subscription as Types.ObjectId;
+        const subscriptionObj: Subscription | null =
+            await subscriptionService.getSubscriptionById(subscription);
+        if (!subscriptionObj)
+            throw new BadRequestError("Subscription does not exist.");
+
+        const newPayment = await paymentService.insertPayment(payment);
+        newPayment.subscription = subscriptionObj;
+        console.log("Payment inserted------------------------------>", {newPayment})
     };
-    
 }
 
 export default new PaymentController();
