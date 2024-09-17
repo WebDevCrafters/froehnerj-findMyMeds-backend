@@ -104,7 +104,7 @@ class PaymentController implements PaymentsEndpoints {
                         product_data: {
                             name: subs.name,
                         },
-                        unit_amount: subs.cost,
+                        unit_amount: subs.cost * 100,
                     },
                     quantity: 1,
                 },
