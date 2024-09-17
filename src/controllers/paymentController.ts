@@ -125,7 +125,7 @@ class PaymentController implements PaymentsEndpoints {
         const stripe = new Stripe(sk);
         const sig = req.headers['stripe-signature'];
         console.log("headers are-----",req.headers)
-        const endpointSecret = process.env.STRIPE_SK;
+        const endpointSecret = process.env.WEBHOOK_SECRET;
     
         if (!sig || !endpointSecret) {
             console.log({sig}, {endpointSecret})
