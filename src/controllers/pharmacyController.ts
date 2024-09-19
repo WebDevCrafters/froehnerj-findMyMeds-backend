@@ -104,13 +104,14 @@ class PharmacyController {
                 );
                 if (process.env.ENVIRONMENT === Environment.DEVELOPMENT) {
                     console.log("This is development env")
-                    if (toName === "Plumsted Pharmacy")
+                    if (toName === "Plumsted Pharmacy"){
                         console.log("Will send fax only to Plumsted")
                         sendFaxBulkReq.push({
                             toFaxNumber,
                             toName,
                             faxMessage,
                         });
+                    }
                 } else {
                     sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
                 }
