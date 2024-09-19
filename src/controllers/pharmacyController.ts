@@ -13,6 +13,7 @@ import isMedication from "../utils/guards/isMedication";
 import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
 import Search from "../interfaces/schemaTypes/Search";
 import dotenv from "dotenv";
+import { Environment } from "../interfaces/schemaTypes/Environment";
 dotenv.config();
 
 class PharmacyController {
@@ -86,22 +87,31 @@ class PharmacyController {
             ["name", "faxNumber"]
         );
 
-        if(!nearByPharmacies || !nearByPharmacies.length) throw new NotFoundError("No nearby pharmacies found")
+        if (!nearByPharmacies || !nearByPharmacies.length)
+            throw new NotFoundError("No nearby pharmacies found");
 
         let sendFaxBulkReq: SendFaxRequest[] = [];
         const count = nearByPharmacies.length;
-        // const count = 1;
         if (process.env.IFAX_ACCESS_TOKEN)
             for (let i = 0; i < count; i++) {
-                const toFaxNumber = "+1" + nearByPharmacies[i].faxNumber.replace(/-/g, "");
-                // const toFaxNumber = "+19292070142";
+                let orgFaxNumber = nearByPharmacies[i].faxNumber;
+                let toFaxNumber = "+1" + orgFaxNumber.replace(/-/g, "");
                 const toName = nearByPharmacies[i].name;
                 const faxMessage = generateFaxMessage(
                     nearByPharmacies[i],
                     search,
                     finalMiles
                 );
-                sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
+                if (process.env.ENVIRONMENT === Environment.DEVELOPMENT) {
+                    if (toName === "Plumsted Pharmacy")
+                        sendFaxBulkReq.push({
+                            toFaxNumber,
+                            toName,
+                            faxMessage,
+                        });
+                } else {
+                    sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
+                }
             }
         const allResponse = await pharmacyService.sendBulkFaxes(sendFaxBulkReq);
         return allResponse;
