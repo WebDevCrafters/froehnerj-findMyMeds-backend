@@ -93,7 +93,7 @@ class PharmacyController {
         // const count = 1;
         if (process.env.IFAX_ACCESS_TOKEN)
             for (let i = 0; i < count; i++) {
-                const toFaxNumber = nearByPharmacies[i].faxNumber;
+                const toFaxNumber = "+1" + nearByPharmacies[i].faxNumber.replace(/-/g, "");
                 // const toFaxNumber = "+19292070142";
                 const toName = nearByPharmacies[i].name;
                 const faxMessage = generateFaxMessage(
