@@ -36,7 +36,6 @@
         "@types/mongoose": "^5.11.97",
         "@types/node": "^22.0.0",
         "@types/nodemailer": "^6.4.15",
-        "@types/puppeteer": "^7.0.4",
         "@types/stripe-v3": "^3.1.33",
         "nodemon": "^3.1.4",
         "socket.io": "^4.7.5",
