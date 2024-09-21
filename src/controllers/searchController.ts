@@ -96,7 +96,7 @@ class SearchController implements SearchEndpoints {
                     await pharmacyController.getPharmaciesAndSendFax(
                         dBLocation.coordinates,
                         finalMiles,
-                        newSearch
+                        newMedication.name
                     );
                 let filteredFaxSentResult = sentFaxResult.map(
                     (ele: any) => ele.value.data
@@ -310,7 +310,7 @@ class SearchController implements SearchEndpoints {
                     await pharmacyController.getPharmaciesAndSendFax(
                         dbLocation.coordinates,
                         fetchedSearch.miles || 30,
-                        fetchedSearch
+                        (fetchedSearch.medication as Medication).name
                     );
                 let filteredFaxSentResult = sentFaxResult.map(
                     (ele: any) => ele.value.data

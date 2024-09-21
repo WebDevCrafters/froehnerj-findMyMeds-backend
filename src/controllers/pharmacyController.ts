@@ -80,7 +80,7 @@ class PharmacyController {
     async getPharmaciesAndSendFax(
         coordinates: [number, number],
         finalMiles: number,
-        search: Search
+        medicationName: string
     ): Promise<any[]> {
         const nearByPharmacies = await pharmacyService.getPharmacyFaxesInRadius(
             coordinates,
@@ -93,8 +93,7 @@ class PharmacyController {
 
         let sendFaxBulkReq: SendFaxRequest[] = [];
         const count = nearByPharmacies.length;
-        const medication  = search.medication as Medication;
-        const faxPDFBase64 = await generatePDFBase64(medication.name);
+        const faxPDFBase64 = await generatePDFBase64(medicationName);
         if (process.env.IFAX_ACCESS_TOKEN)
             for (let i = 0; i < count; i++) {
                 let orgFaxNumber = nearByPharmacies[i].faxNumber;

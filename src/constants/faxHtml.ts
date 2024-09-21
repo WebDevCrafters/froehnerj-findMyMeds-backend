@@ -1,7 +1,7 @@
 export function getFaxHtml(medicationName: string) {
     return `
     
-      <div style="padding: 3rem; display: flex; justify-content: space-between; flex-direction: column;">
+      <div style="padding: 3rem; display: flex; justify-content: space-between; flex-direction: column; gap: 3rem;">
             <div>
                 <h1 style="text-align: center">ATTENTION: PHARMACY STAFF</h1>
                 <h2 style="text-align: center">
