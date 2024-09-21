@@ -14,7 +14,6 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@types/stripe-v3": "^3.1.33",
         "axios": "^1.7.5",
         "bcrypt": "^5.1.1",
         "commander": "^12.1.0",
@@ -38,6 +37,7 @@
         "@types/node": "^22.0.0",
         "@types/nodemailer": "^6.4.15",
         "@types/puppeteer": "^7.0.4",
+        "@types/stripe-v3": "^3.1.33",
         "nodemon": "^3.1.4",
         "socket.io": "^4.7.5",
         "ts-node": "^10.9.2",
