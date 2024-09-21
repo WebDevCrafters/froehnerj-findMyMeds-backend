@@ -8,12 +8,13 @@ import Location, {
     convertToDBLocation,
 } from "../interfaces/responses/Location";
 import isLocation from "../utils/guards/isLocation";
-import { generateFaxMessage } from "../constants/faxMessage";
+import { generateFaxMessage, generatePDFBase64 } from "../constants/faxMessage";
 import isMedication from "../utils/guards/isMedication";
 import { SendFaxRequest } from "../interfaces/requests/SendFaxRequest";
 import Search from "../interfaces/schemaTypes/Search";
 import dotenv from "dotenv";
 import { Environment } from "../interfaces/schemaTypes/Environment";
+import Medication from "../interfaces/schemaTypes/Medication";
 dotenv.config();
 
 class PharmacyController {
@@ -92,16 +93,13 @@ class PharmacyController {
 
         let sendFaxBulkReq: SendFaxRequest[] = [];
         const count = nearByPharmacies.length;
+        const medication  = search.medication as Medication;
+        const faxPDFBase64 = await generatePDFBase64(medication.name);
         if (process.env.IFAX_ACCESS_TOKEN)
             for (let i = 0; i < count; i++) {
                 let orgFaxNumber = nearByPharmacies[i].faxNumber;
                 let toFaxNumber = "+1" + orgFaxNumber.replace(/-/g, "");
                 const toName = nearByPharmacies[i].name;
-                const faxMessage = generateFaxMessage(
-                    nearByPharmacies[i],
-                    search,
-                    finalMiles
-                );
                 if (process.env.ENVIRONMENT === Environment.DEVELOPMENT) {
                     console.log("This is development env")
                     if (toName === "Plumsted Pharmacy"){
@@ -109,11 +107,11 @@ class PharmacyController {
                         sendFaxBulkReq.push({
                             toFaxNumber,
                             toName,
-                            faxMessage,
+                            faxPDFBase64: faxPDFBase64,
                         });
                     }
                 } else {
-                    sendFaxBulkReq.push({ toFaxNumber, toName, faxMessage });
+                    sendFaxBulkReq.push({ toFaxNumber, toName, faxPDFBase64: faxPDFBase64 });
                 }
             }
         const allResponse = await pharmacyService.sendBulkFaxes(sendFaxBulkReq);

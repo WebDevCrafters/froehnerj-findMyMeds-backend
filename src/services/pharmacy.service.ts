@@ -193,14 +193,10 @@ class PharmacyService {
                 url,
                 {
                     faxNumber: detail.toFaxNumber,
-                    subject: "Join FindMyMeds as a Provider",
-                    from_name: "FindMyMeds",
-                    to_name: detail.toName,
-                    message: detail.faxMessage,
                     faxData: [
                         {
-                            fileName: "FindMyMeds.png",
-                            fileData: QRBase64,
+                            fileName: "FindMyMeds.pdf",
+                            fileData: detail.faxPDFBase64,
                         },
                     ],
                 },
