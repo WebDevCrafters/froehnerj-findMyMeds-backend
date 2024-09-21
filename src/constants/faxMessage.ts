@@ -1,7 +1,7 @@
 import Pharmacy from "../interfaces/schemaTypes/Pharmacy";
 import Search from "../interfaces/schemaTypes/Search";
 import Medication from "../interfaces/schemaTypes/Medication";
-import { faxHTML } from "./faxHtml";
+import { getFaxHtml } from "./faxHtml";
 import puppeteer from "puppeteer";
 
 export function generateFaxMessage(
@@ -44,20 +44,19 @@ export function generateFaxMessage(
     return message;
 }
 
-export async function generatePDF() {
-
+export async function generatePDFBase64(medicationName: string) {
     const convertHtmlToPdfBase64 = async (html: string): Promise<string> => {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
-        
+
         await page.setContent(html);
-        const pdfBuffer = await page.pdf({ format: 'A4' });
-        
+        const pdfBuffer = await page.pdf({ format: "A4" });
+
         await browser.close();
-        
-        // Convert to base64
-        return Buffer.from(pdfBuffer).toString('base64');
+        return Buffer.from(pdfBuffer).toString("base64");
     };
-    const a = await convertHtmlToPdfBase64(faxHTML);
-    return a;
+
+    const faxHTML = getFaxHtml(medicationName);
+    const generatedPDFBase64 = await convertHtmlToPdfBase64(faxHTML);
+    return generatedPDFBase64;
 }
