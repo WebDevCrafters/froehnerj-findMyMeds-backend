@@ -9,7 +9,6 @@ import UserModel from "../models/UserModel";
 import { NotFoundError } from "../classes/errors/notFoundError";
 import { convertToLocation } from "../interfaces/schemaTypes/DBLocation";
 import { hashPassword } from "../utils/bcryptManager";
-import fetch from "node-fetch";
 dotenv.config();
 
 class UserService {
