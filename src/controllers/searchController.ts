@@ -103,7 +103,7 @@ class SearchController implements SearchEndpoints {
                 );
 
                 if (!filteredFaxSentResult || !filteredFaxSentResult.length)
-                    throw new ServerError("Failed to send faxes");
+                    throw new ServerError("No faxes have been sent.");
             }
 
             if (prevPayment && prevPayment.status !== PaymentStatus.UNPAID) {
